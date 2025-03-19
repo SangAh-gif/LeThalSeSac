@@ -51,6 +51,11 @@ ALSCharacter::ALSCharacter()
 	{
 		IA_Interact = TempIA_Interact.Object;
 	}
+	ConstructorHelpers::FObjectFinder<UInputAction> TempIA_Jump(TEXT("/Script/EnhancedInput.InputAction'/Game/KHH/Input/IA_LSJump.IA_LSJump'"));
+	if (TempIA_Jump.Succeeded())
+	{
+		IA_Jump = TempIA_Jump.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -90,6 +95,8 @@ void ALSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		InputSys->BindAction(IA_Run, ETriggerEvent::Completed, this, &ALSCharacter::RunEnd);
 		InputSys->BindAction(IA_Duck, ETriggerEvent::Started, this, &ALSCharacter::DuckStart);
 		InputSys->BindAction(IA_Duck, ETriggerEvent::Completed, this, &ALSCharacter::DuckEnd);
+		InputSys->BindAction(IA_Jump, ETriggerEvent::Started, this, &ALSCharacter::Jump);
+		InputSys->BindAction(IA_Jump, ETriggerEvent::Completed, this, &ALSCharacter::StopJumping);
 		InputSys->BindAction(IA_Interact, ETriggerEvent::Triggered, this, &ALSCharacter::Interact);
 	}
 }
@@ -130,6 +137,16 @@ void ALSCharacter::DuckEnd()
 
 void ALSCharacter::Interact()
 {
+	
+}
 
+void ALSCharacter::drawInteractLine()
+{
+	FVector StartPos = VRCamera->GetComponentLocation();
+	FVector EndPos = StartPos + VRCamera->GetForwardVector() * InteractDist;
+	TArray<FHitResult> HitInfos;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+	bool bHit = GetWorld()->SweepMultiByChannel(HitInfos, StartPos, EndPos, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(100), params);
 }
 

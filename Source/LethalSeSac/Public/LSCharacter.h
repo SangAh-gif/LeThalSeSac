@@ -44,6 +44,8 @@ public: // 이동 및 회전
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_Duck;
 	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_Jump;
+	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_Interact;
 
 	void Move(const struct FInputActionValue& val);
@@ -58,5 +60,8 @@ public: // 이동 및 회전
 	float RunSpeed = 1000;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float WalkSpeed = 600;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float InteractDist = 5000;
 
+	void drawInteractLine();
 };
