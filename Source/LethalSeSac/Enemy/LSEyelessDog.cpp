@@ -2,12 +2,15 @@
 
 
 #include "LSEyelessDog.h"
+#include "LSDogFSM.h"
 
 // Sets default values
 ALSEyelessDog::ALSEyelessDog()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	FSM = CreateDefaultSubobject<ULSDogFSM>(TEXT("FSM"));
 
 }
 

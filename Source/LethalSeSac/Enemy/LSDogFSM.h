@@ -13,7 +13,8 @@ enum class EEnemyState : uint8
 	Move,
 	Attack,
 	Damage,
-	Die
+	Die,
+	Patrol
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -47,6 +48,7 @@ public:
 
 	void DieState();
 
+	void PatrolState();
 
 	UPROPERTY(VisibleAnywhere, Category = FSM)
 	class ALSCharacter* target;
@@ -65,9 +67,9 @@ public:
 	FVector randomPos;
 
 	// 랜덤 위치 가져오기
-	//bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
+	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
 
-	//UPROPERTY()
-	//class AAIController* ai;
+	UPROPERTY()
+	class AAIController* ai;
 
 };
