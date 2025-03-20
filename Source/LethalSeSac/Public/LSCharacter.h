@@ -63,5 +63,5 @@ public: // 이동 및 회전
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float InteractDist = 5000;
 
-	void drawInteractLine();
+	bool drawInteractLine(TArray<FHitResult>& HitInfos);
 };

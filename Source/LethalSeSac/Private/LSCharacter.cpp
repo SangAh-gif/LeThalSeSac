@@ -137,16 +137,26 @@ void ALSCharacter::DuckEnd()
 
 void ALSCharacter::Interact()
 {
-	
+	TArray<FHitResult> HitInfos;
+	bool bHit = drawInteractLine(HitInfos);
+	if (bHit)
+	{
+		for (auto HitInfo : HitInfos)
+		{
+			FString str = HitInfo.GetActor()->GetActorNameOrLabel();
+			UE_LOG(LogTemp,Warning, TEXT("%s"), *str);
+		}
+	}
 }
 
-void ALSCharacter::drawInteractLine()
+bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
 {
 	FVector StartPos = VRCamera->GetComponentLocation();
 	FVector EndPos = StartPos + VRCamera->GetForwardVector() * InteractDist;
-	TArray<FHitResult> HitInfos;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
 	bool bHit = GetWorld()->SweepMultiByChannel(HitInfos, StartPos, EndPos, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(100), params);
+
+	return bHit;
 }
 
