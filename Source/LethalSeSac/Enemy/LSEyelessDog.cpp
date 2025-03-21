@@ -12,6 +12,15 @@ ALSEyelessDog::ALSEyelessDog()
 
 	FSM = CreateDefaultSubobject<ULSDogFSM>(TEXT("FSM"));
 
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/SSA/Asset/EyelessDog/scene.scene'"));
+
+	if (tempMesh.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(tempMesh.Object);
+		GetMesh()->SetRelativeLocationAndRotation(FVector(-10.0f, 0.0f, -92.0f), FRotator(0.0f, -90.0f, 0.0f));
+		GetMesh()->SetRelativeScale3D(FVector(0.05f));
+	}
+	
 }
 
 // Called when the game starts or when spawned

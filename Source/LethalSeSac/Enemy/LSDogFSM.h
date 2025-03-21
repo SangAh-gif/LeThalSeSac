@@ -35,9 +35,32 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
-	EEnemyState mState = EEnemyState::Idle;
+	UPROPERTY(EditDefaultsOnly, Category = FSM)
+	float IdleDelayTime = 2.0f;
 
+	// 길찾기 수행시 랜덤위치 
+	FVector randomPos;
+	
+	UPROPERTY(EditDefaultsOnly, Category = FSM)
+	float currentTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float attackRange = 150.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float attackDelayTime = 2.0f;
+
+	int32 MaxHP = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
+	int32 hp = MaxHP;
+
+	UPROPERTY(EditAnywhere, Category = FSM)
+	float damageDelayTime = 2.0f;
+
+
+
+public:
 	void IdleState();
 
 	void MoveState();
@@ -50,26 +73,28 @@ public:
 
 	void PatrolState();
 
+	// 랜덤 위치 가져오기
+	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
+
+	void OnDamageProcess(int damage);
+
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
+	EEnemyState mState = EEnemyState::Idle;
+
+	UPROPERTY()
+	class ULSEyelessDogAnim* Anim;
+	
 	UPROPERTY(VisibleAnywhere, Category = FSM)
 	class ALSCharacter* target;
 
 	UPROPERTY()
 	class ALSEyelessDog* me;
 
-
-	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float IdleDelayTime = 2.0f;
-
-	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float currentTime = 0.0f;
-
-	// 길찾기 수행시 랜덤위치 
-	FVector randomPos;
-
-	// 랜덤 위치 가져오기
-	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
-
 	UPROPERTY()
 	class AAIController* ai;
+
+	
 
 };

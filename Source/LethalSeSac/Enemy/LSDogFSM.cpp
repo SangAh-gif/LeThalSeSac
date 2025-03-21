@@ -196,3 +196,8 @@ bool ULSDogFSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius,
 	return result; 
 }
 
+void ULSDogFSM::OnDamageProcess(int damage)
+{
+
+}
+
