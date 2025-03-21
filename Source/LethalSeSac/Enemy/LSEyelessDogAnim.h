@@ -1,0 +1,36 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Animation/AnimInstance.h"
+#include "LSDogFSM.h"
+#include "LSEyelessDogAnim.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class LETHALSESAC_API ULSEyelessDogAnim : public UAnimInstance
+{
+	GENERATED_BODY()
+
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
+	EEnemyState AnimState;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
+	bool bAttackPlay = false; 
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
+	class UAnimMontage* EnemyMongtage; 
+
+	UFUNCTION()
+	void AnimNotify_AttackEnd();
+
+	UFUNCTION()
+	void AnimNotify_DieEnd();
+
+
+};

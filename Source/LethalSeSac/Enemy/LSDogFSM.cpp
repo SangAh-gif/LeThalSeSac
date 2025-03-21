@@ -5,6 +5,11 @@
 #include "LSCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "LSEyelessDog.h"
+#include "NavigationSystem.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "AITypes.h"
+#include "AIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 //#include "NavigationSystem.h"
 
 // Sets default values for this component's properties
@@ -75,6 +80,11 @@ void ULSDogFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		DieState();
 	}
 		break;
+	case EEnemyState::Patrol:
+	{
+		PatrolState();
+	}
+	break;
 	default:
 		break;
 	}
@@ -99,20 +109,63 @@ void ULSDogFSM::IdleState()
 
 void ULSDogFSM::MoveState()
 {
+
+	// 바로 나에게 오는 것 
+	/*
+	
+
+	*/
+
 	// 타겟 목적지가 필요하다.
 	FVector desttination = target->GetActorLocation();
 
 	// 방향
 	FVector dir = desttination - me->GetActorLocation();
 
+	me->AddMovementInput(dir);
+
 	//auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 
 	// 목적지 길찾기 경로 데이터 검색
-	///FPathFindingQuery query;
-	//?? 
-	//FAIMoveRequest req; 
-
+	FPathFindingQuery query;
+	 
+	FAIMoveRequest req; 
 	
+
+	/*if (!target || !me) return;
+	FVector destination = target->GetActorLocation();
+	FVector         dir = destination - me->GetActorLocation();
+
+	FRotator newRotation = dir.Rotation();
+	newRotation = UKismetMathLibrary::MakeRotFromXZ(dir, me->GetActorUpVector());
+	newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
+	me->SetActorRotation(newRotation);
+
+	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+
+	FPathFindingQuery query;
+	FAIMoveRequest req;
+
+	req.SetAcceptanceRadius(3);
+	req.SetGoalLocation(destination);
+
+	ai->BuildPathfindingQuery(req, query);
+	FPathFindingResult r = ns->FindPathSync(query);
+
+	if (r.Result == ENavigationQueryResult::Success)
+	{
+		me->GetCharacterMovement()->MaxWalkSpeed =600.0f;
+		ai->MoveToLocation(destination);
+
+	}
+	else
+	{
+		auto result = ai->MoveToLocation(randomPos);
+
+	}*/
+	
+	
+	//FVector desttination
 }
 
 void ULSDogFSM::Attack()
@@ -128,4 +181,23 @@ void ULSDogFSM::DieState()
 {
 }
 
+void ULSDogFSM::PatrolState()
+{
+
+}
+
+bool ULSDogFSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest)
+{
+	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	FNavLocation loc;
+	bool result = ns->GetRandomReachablePointInRadius(centerLocation, radius, loc);
+	dest = loc.Location;
+
+	return result; 
+}
+
+void ULSDogFSM::OnDamageProcess(int damage)
+{
+
+}
 
