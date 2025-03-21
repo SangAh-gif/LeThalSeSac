@@ -10,6 +10,7 @@ ALSLight::ALSLight()
 	PrimaryActorTick.bCanEverTick = true;
 
 	LightComp = CreateDefaultSubobject<USpotLightComponent>(TEXT("LightComp"));
+	LightComp->SetupAttachment(MeshComp);
 
 
 }

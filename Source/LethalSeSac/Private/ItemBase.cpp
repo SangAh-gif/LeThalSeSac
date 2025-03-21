@@ -13,6 +13,8 @@ AItemBase::AItemBase()
 
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	SetRootComponent(BoxComp);
+	BoxComp->SetCollisionProfileName(TEXT("Item"));
+	BoxComp->SetSimulatePhysics(true);
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);

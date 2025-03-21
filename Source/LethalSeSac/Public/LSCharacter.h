@@ -29,6 +29,8 @@ public:
 	// 카메라
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* VRCamera;
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* scene;
 
 
 public: // 이동 및 회전
@@ -47,6 +49,8 @@ public: // 이동 및 회전
 	class UInputAction* IA_Jump;
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_Interact;
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_Throw;
 
 	void Move(const struct FInputActionValue& val);
 	void Turn(const struct FInputActionValue& val);
@@ -55,6 +59,7 @@ public: // 이동 및 회전
 	void DuckStart();
 	void DuckEnd();
 	void Interact();
+	void Throw();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 1000;
@@ -62,6 +67,11 @@ public: // 이동 및 회전
 	float WalkSpeed = 600;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float InteractDist = 5000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 SelectedIndex = 0;
 
 	bool drawInteractLine(TArray<FHitResult>& HitInfos);
+
+	TArray<class AItemBase*> ItemArray;
+
 };

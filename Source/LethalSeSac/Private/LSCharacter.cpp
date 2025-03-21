@@ -8,6 +8,8 @@
 #include "EnhancedInputComponent.h"
 #include "InputMappingContext.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ItemBase.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ALSCharacter::ALSCharacter()
@@ -17,6 +19,9 @@ ALSCharacter::ALSCharacter()
 
 	VRCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("VRCamera"));
 	VRCamera->SetupAttachment(RootComponent);
+
+	scene = CreateDefaultSubobject<USceneComponent>(TEXT("scene"));
+	scene->SetupAttachment(RootComponent);
 
 	// Crouch 설정켜기
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
@@ -62,7 +67,7 @@ ALSCharacter::ALSCharacter()
 void ALSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	ItemArray.SetNum(4);
 }
 
 // Called every frame
@@ -98,6 +103,7 @@ void ALSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		InputSys->BindAction(IA_Jump, ETriggerEvent::Started, this, &ALSCharacter::Jump);
 		InputSys->BindAction(IA_Jump, ETriggerEvent::Completed, this, &ALSCharacter::StopJumping);
 		InputSys->BindAction(IA_Interact, ETriggerEvent::Triggered, this, &ALSCharacter::Interact);
+		InputSys->BindAction(IA_Throw, ETriggerEvent::Started, this, &ALSCharacter::Throw);
 	}
 }
 
@@ -141,12 +147,32 @@ void ALSCharacter::Interact()
 	bool bHit = drawInteractLine(HitInfos);
 	if (bHit)
 	{
-		for (auto HitInfo : HitInfos)
+		for (FHitResult HitInfo : HitInfos)
 		{
-			FString str = HitInfo.GetActor()->GetActorNameOrLabel();
-			UE_LOG(LogTemp,Warning, TEXT("%s"), *str);
+			AItemBase* item = Cast<AItemBase>(HitInfo.GetActor());
+			if (item)
+			{
+				if (!ItemArray[SelectedIndex])
+				{
+					ItemArray[SelectedIndex] = item;
+					item->BoxComp->SetSimulatePhysics(false);
+					item->BoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					item->AttachToComponent(scene, FAttachmentTransformRules::SnapToTargetIncludingScale);
+				}
+				break;
+			}
 		}
+			
 	}
+}
+
+void ALSCharacter::Throw()
+{
+	if(!ItemArray[SelectedIndex]) return;
+	ItemArray[SelectedIndex]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	ItemArray[SelectedIndex]->BoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	ItemArray[SelectedIndex]->BoxComp->SetSimulatePhysics(true);
+	ItemArray[SelectedIndex] = nullptr;
 }
 
 bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
@@ -155,7 +181,7 @@ bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
 	FVector EndPos = StartPos + VRCamera->GetForwardVector() * InteractDist;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
-	bool bHit = GetWorld()->SweepMultiByChannel(HitInfos, StartPos, EndPos, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(100), params);
+	bool bHit = GetWorld()->SweepMultiByChannel(HitInfos, StartPos, EndPos, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(50), params);
 
 	return bHit;
 }
