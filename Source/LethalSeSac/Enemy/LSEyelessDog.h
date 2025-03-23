@@ -30,6 +30,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class ULSDogFSM* FSM;
 
+	
+
 	bool Damaged = true; 
 
 public:

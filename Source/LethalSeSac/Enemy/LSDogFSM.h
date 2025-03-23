@@ -35,51 +35,6 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float IdleDelayTime = 2.0f;
-
-	// 길찾기 수행시 랜덤위치 
-	FVector randomPos;
-	
-	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float currentTime = 0.0f;
-
-	UPROPERTY(EditAnywhere, Category =FSM)
-	float attackRange = 150.0f;
-
-	UPROPERTY(EditAnywhere, Category =FSM)
-	float attackDelayTime = 2.0f;
-
-	int32 MaxHP = 1;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
-	int32 hp = MaxHP;
-
-	UPROPERTY(EditAnywhere, Category = FSM)
-	float damageDelayTime = 2.0f;
-
-
-
-public:
-	void IdleState();
-
-	void MoveState();
-
-	void Attack();
-
-	void DamageState();
-
-	void DieState();
-
-	void PatrolState();
-
-	// 랜덤 위치 가져오기
-	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
-
-	void OnDamageProcess(int damage);
-
-
-public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
 	EEnemyState mState = EEnemyState::Idle;
 
@@ -95,6 +50,49 @@ public:
 	UPROPERTY()
 	class AAIController* ai;
 
+public:
+	// 길찾기 수행시 랜덤위치 
+	FVector randomPos;
+
+	UPROPERTY(EditDefaultsOnly, Category = FSM)
+	float IdleDelayTime = 2.0f;
 	
+	UPROPERTY(EditDefaultsOnly, Category = FSM)
+	float currentTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float attackDelayTime = 2.0f;
+
+	UPROPERTY(EditAnywhere, Category = FSM)
+	float damageDelayTime = 2.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float attackRange = 150.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float  traceRange = 500.0f;
+
+	int32 MaxHP = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
+	int32 hp = MaxHP;
+
+public:
+	void IdleState();
+
+	void MoveState();
+
+	void AttackState();
+
+	void DamageState();
+
+	void DieState();
+
+	void PatrolState();
+
+	// 랜덤 위치 가져오기
+	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
+
+	void OnDamageProcess(int damage);
 
 };
