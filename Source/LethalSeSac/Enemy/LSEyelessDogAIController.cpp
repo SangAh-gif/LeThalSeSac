@@ -41,15 +41,53 @@ ALSEyelessDogAIController::ALSEyelessDogAIController()
 
 void ALSEyelessDogAIController::PerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 {
+	//if(!PerceptionComp) return;
+
+	//for (AActor* UpdatedActor : UpdatedActors)
+	//{
+	//	if (!UpdatedActor->ActorHasTag("enemy"))
+	//	{
+	//		FVector NoiseLocation = FVector::ZeroVector; // 감지된 위치 저장
+
+	//		if(CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Damage) || CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Hearing))
+	//		{
+	//			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("hello"));
+
+	//			ALSEyelessDog* enemy = Cast<ALSEyelessDog>(GetCharacter());
+	//			if (enemy)
+	//			{
+	//				enemy->FindComponentByClass<ULSDogFSM>()->mState = EEnemyState::Move;
+	//			}
+	//			if (!NoiseLocation.IsZero())
+	//			{
+	//				MoveToLocation(NoiseLocation);
+	//			}
+	//		}
+	//	}
+	//}
+
 	for (AActor* UpdatedActor : UpdatedActors)
 	{
 		if (!UpdatedActor->ActorHasTag("enemy"))
 		{
-			if(CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Damage) || CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Hearing))
+			FActorPerceptionBlueprintInfo Info;
+			PerceptionComp->GetActorsPerception(UpdatedActor, Info);
+			FVector NoiseLocation = FVector::ZeroVector;
+
+			for (const FAIStimulus& Stimulus : Info.LastSensedStimuli)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("hello"));
-				class ALSEyelessDog* enemy = Cast<ALSEyelessDog>(GetCharacter());
-				enemy->FindComponentByClass<ULSDogFSM>()->mState = EEnemyState::Move;
+				if (UAIPerceptionSystem::GetSenseClassForStimulus(this, Stimulus) == UAISense_Hearing::StaticClass())
+				{
+					NoiseLocation = Stimulus.StimulusLocation;
+					ALSEyelessDog* enemy = Cast<ALSEyelessDog>(GetCharacter());
+					if (enemy)
+					{
+						enemy->FindComponentByClass<ULSDogFSM>()->mState = EEnemyState::Move;
+						MoveToLocation(NoiseLocation);
+						UE_LOG(LogTemp, Log, TEXT("Moving to noise at %s"), *NoiseLocation.ToString());
+					}
+					break;
+				}
 			}
 		}
 	}

@@ -178,6 +178,7 @@ void ULSDogFSM::MoveState()
 	me->SetActorRotation(newRotation);
 
 	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (!ns) return;
 
 	FPathFindingQuery query;
 	FAIMoveRequest req;
