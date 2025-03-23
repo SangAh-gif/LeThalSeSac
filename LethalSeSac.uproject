@@ -9,7 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine"
+				"Engine",
+				"AIModule"
 			]
 		}
 	],
@@ -42,6 +43,10 @@
 				"Android",
 				"VisionOS"
 			]
+		},
+		{
+			"Name": "Landmass",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
