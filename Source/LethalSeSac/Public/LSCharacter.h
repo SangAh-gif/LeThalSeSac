@@ -51,6 +51,8 @@ public: // 이동 및 회전
 	class UInputAction* IA_Interact;
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_Throw;
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_ChangeItem;
 
 	void Move(const struct FInputActionValue& val);
 	void Turn(const struct FInputActionValue& val);
@@ -60,6 +62,8 @@ public: // 이동 및 회전
 	void DuckEnd();
 	void Interact();
 	void Throw();
+	void ChangeItem(const struct FInputActionValue& val);
+	void SelectItem(int32 index, int32 preIndex);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 1000;
@@ -72,6 +76,7 @@ public: // 이동 및 회전
 
 	bool drawInteractLine(TArray<FHitResult>& HitInfos);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class AItemBase*> ItemArray;
 
 };
