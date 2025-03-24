@@ -114,6 +114,9 @@ void ALSCharacter::Move(const struct FInputActionValue& val)
 	FVector2D scale = val.Get<FVector2D>();
 	FVector Dir = VRCamera->GetForwardVector() * scale.X + VRCamera->GetRightVector() * scale.Y;
 	AddMovementInput(Dir);
+	if(!bRun) loud = 1;
+	else loud = 2;
+	WalkSound(loud);
 }
 
 void ALSCharacter::Turn(const struct FInputActionValue& val)
@@ -126,11 +129,13 @@ void ALSCharacter::Turn(const struct FInputActionValue& val)
 void ALSCharacter::RunStart()
 {
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	bRun = true;
 }
 
 void ALSCharacter::RunEnd()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	bRun = false;
 }
 
 void ALSCharacter::DuckStart()
@@ -210,6 +215,7 @@ void ALSCharacter::Use()
 	{
 		ItemArray[SelectedIndex]->UseItem();
 	}
+	
 }
 
 
@@ -227,5 +233,21 @@ bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
 
 void ALSCharacter::Die()
 {
-	
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	if (pc)
+	{
+		pc->SetPause(true);
+		pc->bShowMouseCursor = true;
+	}
+}
+
+void ALSCharacter::WalkSound(float loudness)
+{
+	GetWorldTimerManager().SetTimer(WalkTimer, FTimerDelegate::CreateLambda(
+		[this, loudness]()
+		{
+			MakeNoise(loudness, this, GetActorLocation());
+			UE_LOG(LogTemp,Warning,TEXT("WALKSOUND!"));
+		}
+	), SoundTime, true);
 }

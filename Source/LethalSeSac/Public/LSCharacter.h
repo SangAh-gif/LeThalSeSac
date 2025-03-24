@@ -69,6 +69,7 @@ public: // 이동 및 회전
 	void Use();
 	bool drawInteractLine(TArray<FHitResult>& HitInfos);
 	void Die();
+	void WalkSound(float loud);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 1000;
@@ -82,7 +83,16 @@ public: // 이동 및 회전
 	int32 HP = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Sta = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SoundTime = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurTime = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRun = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float loud = 1;
 
+	FTimerHandle WalkTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class AItemBase*> ItemArray;
