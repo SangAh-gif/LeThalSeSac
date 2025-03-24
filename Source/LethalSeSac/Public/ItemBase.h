@@ -31,4 +31,14 @@ public:
 
 	virtual void UseItem();
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 minVal= 0;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 maxVal = 0;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 curVal = 0;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class UImage* Img;
+
+
 };

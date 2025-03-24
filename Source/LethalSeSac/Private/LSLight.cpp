@@ -12,13 +12,14 @@ ALSLight::ALSLight()
 	LightComp = CreateDefaultSubobject<USpotLightComponent>(TEXT("LightComp"));
 	LightComp->SetupAttachment(MeshComp);
 
-
+	curVal = 5;
 }
 
 void ALSLight::BeginPlay()
 {
 	Super::BeginPlay();
 	LightComp->SetVisibility(false);
+	
 }
 
 void ALSLight::Tick(float DeltaTime)

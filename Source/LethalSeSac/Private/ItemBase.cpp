@@ -13,12 +13,12 @@ AItemBase::AItemBase()
 
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	SetRootComponent(BoxComp);
-	BoxComp->SetCollisionProfileName(TEXT("Item"));
+	BoxComp->SetCollisionProfileName(TEXT("itemcheck"));
 	BoxComp->SetSimulatePhysics(true);
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComp->SetCollisionProfileName(TEXT("Item"));
 }
 
 // Called when the game starts or when spawned
