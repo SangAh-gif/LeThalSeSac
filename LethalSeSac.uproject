@@ -10,7 +10,7 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"AIModule"
+				"UMG"
 			]
 		}
 	],
@@ -43,10 +43,6 @@
 				"Android",
 				"VisionOS"
 			]
-		},
-		{
-			"Name": "Landmass",
-			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

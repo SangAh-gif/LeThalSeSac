@@ -104,6 +104,7 @@ void ALSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		InputSys->BindAction(IA_Jump, ETriggerEvent::Completed, this, &ALSCharacter::StopJumping);
 		InputSys->BindAction(IA_Interact, ETriggerEvent::Triggered, this, &ALSCharacter::Interact);
 		InputSys->BindAction(IA_Throw, ETriggerEvent::Started, this, &ALSCharacter::Throw);
+		InputSys->BindAction(IA_ChangeItem, ETriggerEvent::Triggered, this, &ALSCharacter::ChangeItem);
 	}
 }
 
@@ -173,6 +174,31 @@ void ALSCharacter::Throw()
 	ItemArray[SelectedIndex]->BoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ItemArray[SelectedIndex]->BoxComp->SetSimulatePhysics(true);
 	ItemArray[SelectedIndex] = nullptr;
+	MakeNoise(2, this, GetActorLocation());
+}
+
+void ALSCharacter::ChangeItem(const struct FInputActionValue& val)
+{
+	int32 preIndex = SelectedIndex;
+	SelectedIndex += (int32)val.Get<float>();
+	SelectedIndex = SelectedIndex < 0 ? 3 : SelectedIndex;
+	SelectedIndex %= 4;
+	UE_LOG(LogTemp, Warning, TEXT("%d"), SelectedIndex);
+	SelectItem(SelectedIndex, preIndex);
+}
+
+void ALSCharacter::SelectItem(int32 index, int32 preIndex)
+{
+	if (ItemArray[preIndex])
+	{
+		//ItemArray[preIndex]->BoxComp->SetVisibility(false);
+		ItemArray[preIndex]->SetActorHiddenInGame(true);
+	}
+	if(ItemArray[index])
+	{
+		//ItemArray[index]->BoxComp->SetVisibility(true);
+		ItemArray[index]->SetActorHiddenInGame(false);
+	}
 }
 
 bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
