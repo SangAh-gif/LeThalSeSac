@@ -174,6 +174,7 @@ void ALSCharacter::Throw()
 	ItemArray[SelectedIndex]->BoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ItemArray[SelectedIndex]->BoxComp->SetSimulatePhysics(true);
 	ItemArray[SelectedIndex] = nullptr;
+	MakeNoise(2, this, GetActorLocation());
 }
 
 void ALSCharacter::ChangeItem(const struct FInputActionValue& val)
@@ -190,12 +191,12 @@ void ALSCharacter::SelectItem(int32 index, int32 preIndex)
 {
 	if (ItemArray[preIndex])
 	{
-		//ItemArray[index]->BoxComp->SetVisibility(true);
+		//ItemArray[preIndex]->BoxComp->SetVisibility(false);
 		ItemArray[preIndex]->SetActorHiddenInGame(true);
 	}
 	if(ItemArray[index])
 	{
-		//ItemArray[index]->BoxComp->SetVisibility(false);
+		//ItemArray[index]->BoxComp->SetVisibility(true);
 		ItemArray[index]->SetActorHiddenInGame(false);
 	}
 }
