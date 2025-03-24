@@ -31,4 +31,12 @@ public:
 
 	virtual void UseItem();
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 minVal;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 maxVal;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int32 curVal = 0;
+
+
 };
