@@ -43,7 +43,8 @@ void ULSDogFSM::BeginPlay()
 	Anim = Cast<ULSEyelessDogAnim>(me->GetMesh()->GetAnimInstance());
 
 
-	ai = Cast<ALSEyelessDogAIController>(me->GetController());
+	//ai = Cast<ALSEyelessDogAIController>(me->GetController());
+	ai = Cast<AAIController>(me->GetController());
 
 }
 
@@ -102,10 +103,10 @@ void ULSDogFSM::IdleState()
 
 	if (currentTime >= IdleDelayTime)
 	{
-		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
-		mState = EEnemyState::Patrol;
-		currentTime = 0.0f;
+		mState          = EEnemyState::Move;
+		currentTime     = 0.0f;
 		Anim->AnimState = mState;
+		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
 	}
 }
 
@@ -115,60 +116,60 @@ void ULSDogFSM::MoveState()
 	// 바로 나에게 오는 것 
 	
 	
-	//// 타겟 목적지가 필요하다.
-	//FVector desttination = target->GetActorLocation();
+	// 타겟 목적지가 필요하다.
+	FVector desttination = target->GetActorLocation();
 
-	//// 방향
-	//FVector dir = desttination - me->GetActorLocation();
+	// 방향
+	FVector dir = desttination - me->GetActorLocation();
 
-	//auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 
-	//// 목적지 길찾기 경로 데이터 검색
-	//FPathFindingQuery query;
-	//FAIMoveRequest req;
+	// 목적지 길찾기 경로 데이터 검색
+	FPathFindingQuery query;
+	FAIMoveRequest req;
 
-	//// 목적지에서 인지할 수 있는 범위
-	//req.SetAcceptanceRadius(3);
-	//req.SetGoalLocation(desttination);
+	// 목적지에서 인지할 수 있는 범위
+	req.SetAcceptanceRadius(3);
+	req.SetGoalLocation(desttination);
 
-	//// 길 찾기를 위한 쿼리 생성
-	//ai->BuildPathfindingQuery(req, query);
+	// 길 찾기를 위한 쿼리 생성
+	ai->BuildPathfindingQuery(req, query);
 
-	//// 길찾기 결과 가져오기
-	//FPathFindingResult r = ns->FindPathSync(query);
+	// 길찾기 결과 가져오기
+	FPathFindingResult r = ns->FindPathSync(query);
 
-	//// 목적지까지 길 찾기 성공 여부 확인
-	//if (r.Result == ENavigationQueryResult::Success)
-	//{
-	//	ai->MoveToLocation(desttination);
-	//}
-	//else
-	//{
-	//	auto result = ai->MoveToLocation(randomPos);
+	// 목적지까지 길 찾기 성공 여부 확인
+	if (r.Result == ENavigationQueryResult::Success)
+	{
+		ai->MoveToLocation(desttination);
+	}
+	else
+	{
+		auto result = ai->MoveToLocation(randomPos);
 
-	//	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
-	//	{
-	//		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
-	//	}
-	//}
+		if (result == EPathFollowingRequestResult::AlreadyAtGoal)
+		{
+			GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+		}
+	}
 
-	//if (dir.Size() < attackRange)
-	//{
-	//	// 길 찾기 기능 정지
-	//	ai->StopMovement();
+	if (dir.Size() < attackRange)
+	{
+		// 길 찾기 기능 정지
+		ai->StopMovement();
 
-	//	mState = EEnemyState::Attack;
+		mState = EEnemyState::Attack;
 
-	//	Anim->AnimState = mState;
+		Anim->AnimState = mState;
 
-	//	Anim->bAttackPlay = true;
+		Anim->bAttackPlay = true;
 
-	//	currentTime = attackDelayTime;
-	//}
+		currentTime = attackDelayTime;
+	}
 
 	
 
-	if (!target || !me) return;
+	/*if (!target || !me) return;
 	FVector destination = target->GetActorLocation();
 	FVector         dir = destination - me->GetActorLocation();
 
@@ -202,19 +203,20 @@ void ULSDogFSM::MoveState()
 			Anim->bAttackPlay = true;
 			currentTime = attackDelayTime;
 		}
-	}
+	}*/
 }
 
 void ULSDogFSM::AttackState()
 {
-	me->GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	/*me->GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+
 	FVector destination = target->GetActorLocation();
 	FVector dir = destination - me->GetActorLocation();
 
 	FRotator newRotation = dir.Rotation();
 	newRotation = UKismetMathLibrary::MakeRotFromXZ(dir, me->GetActorUpVector());
 	newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 0.2f);
-	me->SetActorRotation(newRotation);
+	me->SetActorRotation(newRotation);*/
 
 	currentTime += GetWorld()->GetDeltaSeconds();
 
@@ -224,12 +226,26 @@ void ULSDogFSM::AttackState()
 		Anim->bAttackPlay = true;
 	}
 
-	if (dir.Size() > attackRange)
+	else
+	{
+		float distance = FVector::Distance(target->GetActorLocation(), me->GetActorLocation());
+
+		if (distance > attackRange)
+		{
+			mState = EEnemyState::Move;
+
+			Anim->AnimState = mState;
+
+			GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+		}
+	}
+
+	/*if (dir.Size() > attackRange)
 	{
 		mState = EEnemyState::Move;
 		Anim->AnimState =mState;
 		currentTime = 0;
-	}
+	}*/
 }
 
 void ULSDogFSM::DamageState()
