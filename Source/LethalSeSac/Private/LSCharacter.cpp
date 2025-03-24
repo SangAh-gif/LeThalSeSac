@@ -105,6 +105,7 @@ void ALSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		InputSys->BindAction(IA_Interact, ETriggerEvent::Triggered, this, &ALSCharacter::Interact);
 		InputSys->BindAction(IA_Throw, ETriggerEvent::Started, this, &ALSCharacter::Throw);
 		InputSys->BindAction(IA_ChangeItem, ETriggerEvent::Triggered, this, &ALSCharacter::ChangeItem);
+		InputSys->BindAction(IA_UseItem, ETriggerEvent::Started, this, &ALSCharacter::Use);
 	}
 }
 
@@ -158,6 +159,7 @@ void ALSCharacter::Interact()
 					ItemArray[SelectedIndex] = item;
 					item->BoxComp->SetSimulatePhysics(false);
 					item->BoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					item->MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 					item->AttachToComponent(scene, FAttachmentTransformRules::SnapToTargetIncludingScale);
 				}
 				break;
@@ -173,8 +175,9 @@ void ALSCharacter::Throw()
 	ItemArray[SelectedIndex]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	ItemArray[SelectedIndex]->BoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ItemArray[SelectedIndex]->BoxComp->SetSimulatePhysics(true);
+	ItemArray[SelectedIndex]->MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ItemArray[SelectedIndex] = nullptr;
-	MakeNoise(2, this, GetActorLocation());
+	MakeNoise(2, this, GetActorLocation(), 1000, TEXT("Noise"));
 }
 
 void ALSCharacter::ChangeItem(const struct FInputActionValue& val)
@@ -201,6 +204,16 @@ void ALSCharacter::SelectItem(int32 index, int32 preIndex)
 	}
 }
 
+void ALSCharacter::Use()
+{
+	if (ItemArray[SelectedIndex])
+	{
+		ItemArray[SelectedIndex]->UseItem();
+	}
+}
+
+
+
 bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
 {
 	FVector StartPos = VRCamera->GetComponentLocation();
@@ -212,3 +225,7 @@ bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
 	return bHit;
 }
 
+void ALSCharacter::Die()
+{
+	
+}
