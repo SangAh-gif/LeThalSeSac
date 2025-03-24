@@ -17,8 +17,8 @@ class LETHALSESAC_API ULSEyelessDogAnim : public UAnimInstance
 
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
-	EEnemyState AnimState;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
+	EEnemyState AnimState = EEnemyState::Idle;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
 	bool bAttackPlay = false; 

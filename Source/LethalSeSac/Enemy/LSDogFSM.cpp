@@ -6,11 +6,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "LSEyelessDog.h"
 #include "NavigationSystem.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "AITypes.h"
 #include "AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
-//#include "NavigationSystem.h"
+#include "LSEyelessDogAnim.h"
+#include "LSEyelessDogAIController.h"
 
 // Sets default values for this component's properties
 ULSDogFSM::ULSDogFSM()
@@ -38,7 +40,11 @@ void ULSDogFSM::BeginPlay()
 	// 소유 객체
 	me = Cast<ALSEyelessDog>(GetOwner());
 
-	//ai = Cast<AAIController>(me->GetController());
+	Anim = Cast<ULSEyelessDogAnim>(me->GetMesh()->GetAnimInstance());
+
+
+	ai = Cast<ALSEyelessDogAIController>(me->GetController());
+
 }
 
 
@@ -67,7 +73,7 @@ void ULSDogFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		break;
 	case EEnemyState::Attack:
 	{
-		Attack();
+		AttackState();
 	}
 		break;
 	case EEnemyState::Damage:
@@ -94,45 +100,75 @@ void ULSDogFSM::IdleState()
 {
 	currentTime += GetWorld()->DeltaTimeSeconds;
 
-	if (currentTime > IdleDelayTime)
+	if (currentTime >= IdleDelayTime)
 	{
-		mState = EEnemyState::Move;
-
+		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+		mState = EEnemyState::Patrol;
 		currentTime = 0.0f;
-
-		// Anim->AnimState = mState;
-		
-		//GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+		Anim->AnimState = mState;
 	}
-
 }
 
 void ULSDogFSM::MoveState()
 {
 
 	// 바로 나에게 오는 것 
-	/*
 	
+	
+	//// 타겟 목적지가 필요하다.
+	//FVector desttination = target->GetActorLocation();
 
-	*/
-
-	// 타겟 목적지가 필요하다.
-	FVector desttination = target->GetActorLocation();
-
-	// 방향
-	FVector dir = desttination - me->GetActorLocation();
-
-	me->AddMovementInput(dir);
+	//// 방향
+	//FVector dir = desttination - me->GetActorLocation();
 
 	//auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 
-	// 목적지 길찾기 경로 데이터 검색
-	FPathFindingQuery query;
-	 
-	FAIMoveRequest req; 
+	//// 목적지 길찾기 경로 데이터 검색
+	//FPathFindingQuery query;
+	//FAIMoveRequest req;
+
+	//// 목적지에서 인지할 수 있는 범위
+	//req.SetAcceptanceRadius(3);
+	//req.SetGoalLocation(desttination);
+
+	//// 길 찾기를 위한 쿼리 생성
+	//ai->BuildPathfindingQuery(req, query);
+
+	//// 길찾기 결과 가져오기
+	//FPathFindingResult r = ns->FindPathSync(query);
+
+	//// 목적지까지 길 찾기 성공 여부 확인
+	//if (r.Result == ENavigationQueryResult::Success)
+	//{
+	//	ai->MoveToLocation(desttination);
+	//}
+	//else
+	//{
+	//	auto result = ai->MoveToLocation(randomPos);
+
+	//	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
+	//	{
+	//		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+	//	}
+	//}
+
+	//if (dir.Size() < attackRange)
+	//{
+	//	// 길 찾기 기능 정지
+	//	ai->StopMovement();
+
+	//	mState = EEnemyState::Attack;
+
+	//	Anim->AnimState = mState;
+
+	//	Anim->bAttackPlay = true;
+
+	//	currentTime = attackDelayTime;
+	//}
+
 	
 
-	/*if (!target || !me) return;
+	if (!target || !me) return;
 	FVector destination = target->GetActorLocation();
 	FVector         dir = destination - me->GetActorLocation();
 
@@ -142,6 +178,7 @@ void ULSDogFSM::MoveState()
 	me->SetActorRotation(newRotation);
 
 	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (!ns) return;
 
 	FPathFindingQuery query;
 	FAIMoveRequest req;
@@ -154,43 +191,115 @@ void ULSDogFSM::MoveState()
 
 	if (r.Result == ENavigationQueryResult::Success)
 	{
-		me->GetCharacterMovement()->MaxWalkSpeed =600.0f;
+		me->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 		ai->MoveToLocation(destination);
 
+		if (dir.Size() < attackRange)
+		{
+			ai->StopMovement();
+			mState = EEnemyState::Attack;
+			Anim->AnimState = mState;
+			Anim->bAttackPlay = true;
+			currentTime = attackDelayTime;
+		}
 	}
-	else
-	{
-		auto result = ai->MoveToLocation(randomPos);
-
-	}*/
-	
-	
-	//FVector desttination
 }
 
-void ULSDogFSM::Attack()
+void ULSDogFSM::AttackState()
 {
+	me->GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	FVector destination = target->GetActorLocation();
+	FVector dir = destination - me->GetActorLocation();
 
+	FRotator newRotation = dir.Rotation();
+	newRotation = UKismetMathLibrary::MakeRotFromXZ(dir, me->GetActorUpVector());
+	newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 0.2f);
+	me->SetActorRotation(newRotation);
+
+	currentTime += GetWorld()->GetDeltaSeconds();
+
+	if (currentTime >= attackDelayTime)
+	{
+		currentTime = 0.0f;
+		Anim->bAttackPlay = true;
+	}
+
+	if (dir.Size() > attackRange)
+	{
+		mState = EEnemyState::Move;
+		Anim->AnimState =mState;
+		currentTime = 0;
+	}
 }
 
 void ULSDogFSM::DamageState()
 {
+	currentTime += GetWorld()->DeltaTimeSeconds;
+
+	if (currentTime >= damageDelayTime)
+	{
+		mState = EEnemyState::Idle;
+		currentTime = 0.0f;
+
+		Anim->AnimState = mState;
+	}
 }
 
 void ULSDogFSM::DieState()
 {
+
 }
 
 void ULSDogFSM::PatrolState()
 {
+	/*me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
+	auto result = ai->MoveToLocation(randomPos);
+	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
+	{
+		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+	}*/
 
+	if (!ai)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AI Controller is null in PatrolState!"));
+		return;
+	}
+
+	me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
+
+	if (!GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to find a valid patrol position!"));
+		return;
+	}
+
+	EPathFollowingRequestResult::Type result = ai->MoveToLocation(randomPos);
+
+	if (result == EPathFollowingRequestResult::RequestSuccessful)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AI started moving to patrol position."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AI move request failed!"));
+		return;
+	}
+
+	// 목표에 도착했는지 확인
+	if (ai->GetMoveStatus() == EPathFollowingStatus::Idle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AI has reached the patrol position. Finding new destination."));
+		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+	}
 }
 
 bool ULSDogFSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest)
 {
 	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	
 	FNavLocation loc;
 	bool result = ns->GetRandomReachablePointInRadius(centerLocation, radius, loc);
+	
 	dest = loc.Location;
 
 	return result; 
@@ -198,6 +307,18 @@ bool ULSDogFSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius,
 
 void ULSDogFSM::OnDamageProcess(int damage)
 {
-
+	hp -= damage;
+	if (hp > 0)
+	{
+		mState = EEnemyState::Damage;
+		int32 randValue = FMath::RandRange(0, 1);
+		FString sectionName = FString::Printf(TEXT("Damage%d"), randValue);
+		me->PlayAnimMontage(Anim->EnemyMongtage, 1.0f, FName(*sectionName));
+	}
+	else
+	{
+		mState = EEnemyState::Die;
+		me->PlayAnimMontage(Anim->EnemyMongtage, 1.0f, TEXT("Die"));
+	}
 }
 
