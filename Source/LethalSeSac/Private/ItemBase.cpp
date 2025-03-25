@@ -3,6 +3,7 @@
 
 #include "ItemBase.h"
 #include "Components/BoxComponent.h"
+#include "Components/ChildActorComponent.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -19,12 +20,21 @@ AItemBase::AItemBase()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
 	MeshComp->SetCollisionProfileName(TEXT("Item"));
+
+	ItemInfoComp = CreateDefaultSubobject<UChildActorComponent>(TEXT("ItemInfoComp"));
+	ItemInfoComp->SetupAttachment(RootComponent);
+	ConstructorHelpers::FClassFinder<AActor> TempInfo(TEXT("/Script/Engine.Blueprint'/Game/KHH/Blueprints/BP_ItemInfo.BP_ItemInfo_C'"));
+	if (TempInfo.Succeeded())
+	{
+		ItemInfoComp->SetChildActorClass(TempInfo.Class);
+	}
 }
 
 // Called when the game starts or when spawned
 void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
+	ItemInfoComp->SetVisibility(false);
 	
 }
 
@@ -33,6 +43,16 @@ void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bShowInfo)
+	{
+		curtime += DeltaTime;
+		if (curtime >= ShowTime)
+		{
+			bShowInfo = false;
+			ItemInfoComp->SetVisibility(false);
+			curtime = 0;
+		}
+	}
 }
 
 void AItemBase::UseItem()
@@ -42,6 +62,9 @@ void AItemBase::UseItem()
 
 void AItemBase::ShowInfo()
 {
-	UE_LOG(LogTemp,Warning,TEXT("INFO"));
+	FString str = GetActorNameOrLabel();
+	bShowInfo = true;
+	ItemInfoComp->SetVisibility(true);
+	UE_LOG(LogTemp,Warning,TEXT("%s"),*str);
 }
 

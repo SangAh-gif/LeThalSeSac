@@ -41,5 +41,11 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UImage* Img;
 
+	UPROPERTY(VisibleAnywhere)
+	class UChildActorComponent* ItemInfoComp;
 
+	bool bShowInfo = false;
+	float curtime = 0;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Info)
+	float ShowTime = 3;
 };

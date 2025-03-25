@@ -208,7 +208,7 @@ void ALSCharacter::Interact()
 					item->BoxComp->SetSimulatePhysics(false);
 					item->BoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 					item->MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-					item->AttachToComponent(scene, FAttachmentTransformRules::SnapToTargetIncludingScale);
+					item->AttachToComponent(scene, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 				}
 				break;
 			}
