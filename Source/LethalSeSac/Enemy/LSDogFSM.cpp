@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "LSEyelessDogAnim.h"
 #include "LSEyelessDogAIController.h"
+#include "Components\CapsuleComponent.h"
 
 // Sets default values for this component's properties
 ULSDogFSM::ULSDogFSM()
@@ -224,6 +225,7 @@ void ULSDogFSM::AttackState()
 	{
 		currentTime = 0.0f;
 		Anim->bAttackPlay = true;
+		target->Die();
 	}
 
 	else
@@ -263,7 +265,10 @@ void ULSDogFSM::DamageState()
 
 void ULSDogFSM::DieState()
 {
+	ai->isDead = true;
 
+	me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+	
 }
 
 void ULSDogFSM::PatrolState()
