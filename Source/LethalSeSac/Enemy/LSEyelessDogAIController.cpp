@@ -27,8 +27,8 @@ ALSEyelessDogAIController::ALSEyelessDogAIController()
 	if (HearingConfig)
 	{
 		HearingConfig->HearingRange = 600.0f; // 감지 거리 조절 
-		HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-		HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
+		HearingConfig->DetectionByAffiliation.bDetectEnemies    = true;
+		HearingConfig->DetectionByAffiliation.bDetectNeutrals   = true;
 		HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
 		PerceptionComp->ConfigureSense(*HearingConfig);
@@ -47,11 +47,13 @@ void ALSEyelessDogAIController::PerceptionUpdated(const TArray<AActor*>& Updated
 	{
 		if (!UpdatedActor->ActorHasTag("enemy"))
 		{
-			FVector NoiseLocation = FVector::ZeroVector; // 감지된 위치 저장
+			NoiseLocation = FVector::ZeroVector; // 감지된 위치 저장
+
+			
 
 			if(CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Damage) || CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Hearing))
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("hello"));
+				GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("hi"));
 
 				ALSEyelessDog* enemy = Cast<ALSEyelessDog>(GetCharacter());
 				if (enemy)
@@ -125,5 +127,16 @@ bool ALSEyelessDogAIController::CanSenseActor(AActor* actor, enemyAISenseEyeless
 		}
 	}
 	return false;
+}
+
+void ALSEyelessDogAIController::OnHearNoise(APawn* NoiseInstigator, const FVector& Location, float Volume)
+{
+	NoiseLocation = Location;
+	bHearNoise = true;
+}
+
+FVector ALSEyelessDogAIController::GetNoisLocation()
+{
+	return NoiseLocation;
 }
 

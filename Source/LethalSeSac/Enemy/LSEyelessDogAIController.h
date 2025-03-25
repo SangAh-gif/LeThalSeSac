@@ -42,5 +42,15 @@ public:
 	bool CanSenseActor(AActor* actor, enemyAISenseEyelessDog AIPerceptionSense);
 
 	bool isDead = false;
+
+	ALSEyelessDogAIController* SetNoisiLocation(FVector InNoiseLocation) { this->NoiseLocation = InNoiseLocation; return this; }
+
+	void OnHearNoise(APawn* NoiseInstigator, const FVector& Location, float Volume);
+
+	FVector GetNoisLocation();
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FVector NoiseLocation; 
+
+	bool bHearNoise = false;
 };

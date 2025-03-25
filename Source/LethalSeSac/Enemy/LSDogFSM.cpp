@@ -174,6 +174,7 @@ void ULSDogFSM::MoveState()
 	FVector destination = target->GetActorLocation();
 	FVector         dir = destination - me->GetActorLocation();
 
+
 	FRotator newRotation = dir.Rotation();
 	newRotation = UKismetMathLibrary::MakeRotFromXZ(dir, me->GetActorUpVector());
 	newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
