@@ -48,8 +48,8 @@ public:
 	class ALSEyelessDog* me;
 
 	UPROPERTY()
-	class AAIController* ai;
-	//class ALSEyelessDogAIController* ai;
+	//class AAIController* ai;
+	class ALSEyelessDogAIController* ai;
 
 public:
 	// 길찾기 수행시 랜덤위치 
@@ -73,7 +73,7 @@ public:
 	UPROPERTY(EditAnywhere, Category =FSM)
 	float  traceRange = 500.0f;
 
-	int32 MaxHP = 1;
+	int32 MaxHP = 2;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
 	int32 hp = MaxHP;

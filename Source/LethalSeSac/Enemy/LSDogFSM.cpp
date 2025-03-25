@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "LSEyelessDogAnim.h"
 #include "LSEyelessDogAIController.h"
+#include "Components\CapsuleComponent.h"
 
 // Sets default values for this component's properties
 ULSDogFSM::ULSDogFSM()
@@ -44,7 +45,7 @@ void ULSDogFSM::BeginPlay()
 
 
 	//ai = Cast<ALSEyelessDogAIController>(me->GetController());
-	ai = Cast<AAIController>(me->GetController());
+	ai = Cast<ALSEyelessDogAIController>(me->GetController());
 
 }
 
@@ -103,7 +104,7 @@ void ULSDogFSM::IdleState()
 
 	if (currentTime >= IdleDelayTime)
 	{
-		mState          = EEnemyState::Move;
+		mState          = EEnemyState::Patrol;
 		currentTime     = 0.0f;
 		Anim->AnimState = mState;
 		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
@@ -117,59 +118,59 @@ void ULSDogFSM::MoveState()
 	
 	
 	// 타겟 목적지가 필요하다.
-	FVector desttination = target->GetActorLocation();
+	//FVector desttination = target->GetActorLocation();
 
-	// 방향
-	FVector dir = desttination - me->GetActorLocation();
+	//// 방향
+	//FVector dir = desttination - me->GetActorLocation();
 
-	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	//auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 
-	// 목적지 길찾기 경로 데이터 검색
-	FPathFindingQuery query;
-	FAIMoveRequest req;
+	//// 목적지 길찾기 경로 데이터 검색
+	//FPathFindingQuery query;
+	//FAIMoveRequest req;
 
-	// 목적지에서 인지할 수 있는 범위
-	req.SetAcceptanceRadius(3);
-	req.SetGoalLocation(desttination);
+	//// 목적지에서 인지할 수 있는 범위
+	//req.SetAcceptanceRadius(3);
+	//req.SetGoalLocation(desttination);
 
-	// 길 찾기를 위한 쿼리 생성
-	ai->BuildPathfindingQuery(req, query);
+	//// 길 찾기를 위한 쿼리 생성
+	//ai->BuildPathfindingQuery(req, query);
+	//
+	//// 길찾기 결과 가져오기
+	//FPathFindingResult r = ns->FindPathSync(query);
 
-	// 길찾기 결과 가져오기
-	FPathFindingResult r = ns->FindPathSync(query);
+	//// 목적지까지 길 찾기 성공 여부 확인
+	//if (r.Result == ENavigationQueryResult::Success)
+	//{
+	//	ai->MoveToLocation(desttination);
+	//}
+	//else
+	//{
+	//	auto result = ai->MoveToLocation(randomPos);
 
-	// 목적지까지 길 찾기 성공 여부 확인
-	if (r.Result == ENavigationQueryResult::Success)
-	{
-		ai->MoveToLocation(desttination);
-	}
-	else
-	{
-		auto result = ai->MoveToLocation(randomPos);
+	//	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
+	//	{
+	//		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+	//	}
+	//}
 
-		if (result == EPathFollowingRequestResult::AlreadyAtGoal)
-		{
-			GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
-		}
-	}
+	//if (dir.Size() < attackRange)
+	//{
+	//	// 길 찾기 기능 정지
+	//	ai->StopMovement();
 
-	if (dir.Size() < attackRange)
-	{
-		// 길 찾기 기능 정지
-		ai->StopMovement();
+	//	mState = EEnemyState::Attack;
 
-		mState = EEnemyState::Attack;
+	//	Anim->AnimState = mState;
 
-		Anim->AnimState = mState;
+	//	Anim->bAttackPlay = true;
 
-		Anim->bAttackPlay = true;
-
-		currentTime = attackDelayTime;
-	}
+	//	currentTime = attackDelayTime;
+	//}
 
 	
 
-	/*if (!target || !me) return;
+	if (!target || !me) return;
 	FVector destination = target->GetActorLocation();
 	FVector         dir = destination - me->GetActorLocation();
 
@@ -203,7 +204,7 @@ void ULSDogFSM::MoveState()
 			Anim->bAttackPlay = true;
 			currentTime = attackDelayTime;
 		}
-	}*/
+	}
 }
 
 void ULSDogFSM::AttackState()
@@ -224,6 +225,7 @@ void ULSDogFSM::AttackState()
 	{
 		currentTime = 0.0f;
 		Anim->bAttackPlay = true;
+		//target->Die();
 	}
 
 	else
@@ -263,50 +265,53 @@ void ULSDogFSM::DamageState()
 
 void ULSDogFSM::DieState()
 {
+	ai->isDead = true;
 
+	me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+	
 }
 
 void ULSDogFSM::PatrolState()
 {
-	/*me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
+	me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
 	auto result = ai->MoveToLocation(randomPos);
 	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
 	{
 		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
-	}*/
-
-	if (!ai)
-	{
-		UE_LOG(LogTemp, Error, TEXT("AI Controller is null in PatrolState!"));
-		return;
 	}
 
-	me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
+	//if (!ai)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("AI Controller is null in PatrolState!"));
+	//	return;
+	//}
 
-	if (!GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to find a valid patrol position!"));
-		return;
-	}
+	//me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
 
-	EPathFollowingRequestResult::Type result = ai->MoveToLocation(randomPos);
+	//if (!GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos))
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("Failed to find a valid patrol position!"));
+	//	return;
+	//}
 
-	if (result == EPathFollowingRequestResult::RequestSuccessful)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AI started moving to patrol position."));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AI move request failed!"));
-		return;
-	}
+	//EPathFollowingRequestResult::Type result = ai->MoveToLocation(randomPos);
 
-	// 목표에 도착했는지 확인
-	if (ai->GetMoveStatus() == EPathFollowingStatus::Idle)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AI has reached the patrol position. Finding new destination."));
-		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
-	}
+	//if (result == EPathFollowingRequestResult::RequestSuccessful)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("AI started moving to patrol position."));
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("AI move request failed!"));
+	//	return;
+	//}
+
+	//// 목표에 도착했는지 확인
+	//if (ai->GetMoveStatus() == EPathFollowingStatus::Idle)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("AI has reached the patrol position. Finding new destination."));
+	//	GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+	//}
 }
 
 bool ULSDogFSM::GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest)
