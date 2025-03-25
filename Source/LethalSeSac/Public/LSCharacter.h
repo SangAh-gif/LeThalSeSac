@@ -55,8 +55,11 @@ public: // 이동 및 회전
 	class UInputAction* IA_ChangeItem;
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_UseItem;
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_Scan;
 
 	void Move(const struct FInputActionValue& val);
+	void ChangeMove();
 	void Turn(const struct FInputActionValue& val);
 	void RunStart();
 	void RunEnd();
@@ -69,20 +72,41 @@ public: // 이동 및 회전
 	void Use();
 	bool drawInteractLine(TArray<FHitResult>& HitInfos);
 	void Die();
+	void WalkSound(float loud);
+	void Scan();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 1000;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float WalkSpeed = 600;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float InteractDist = 5000;
+	float InteractDist = 500;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ScanDist = 1500;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WalkSoundTime = 0.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RunSoundTime = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurSoundTime = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurTime = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRun = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Walkloud =1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Runloud =2;
+	float loud = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 SelectedIndex = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 HP = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Sta = 100;
+	bool bIsMoving = false;
 
+	FTimerHandle WalkTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class AItemBase*> ItemArray;

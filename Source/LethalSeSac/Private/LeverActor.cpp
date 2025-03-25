@@ -1,47 +1,41 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ItemBase.h"
+#include "LeverActor.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
-AItemBase::AItemBase()
+ALeverActor::ALeverActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	Tags.Add(TEXT("Item"));
 
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
-	SetRootComponent(BoxComp);
-	BoxComp->SetCollisionProfileName(TEXT("itemcheck"));
-	BoxComp->SetSimulatePhysics(true);
+	BoxComp->SetupAttachment(RootComponent);
+	BoxComp->SetBoxExtent(FVector(50));
+	BoxComp->SetRelativeLocation(FVector((-130.000000, 9010.000000, 1225.000000)));
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
-	MeshComp->SetCollisionProfileName(TEXT("Item"));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(TEXT("/Script/Engine.StaticMesh'/Game/SSA/Ship/ShipMesh/Lever_001_Baked1.Lever_001_Baked1'"));
+	if (TempMesh.Succeeded())
+	{
+		MeshComp->SetStaticMesh(TempMesh.Object);
+	}
 }
 
 // Called when the game starts or when spawned
-void AItemBase::BeginPlay()
+void ALeverActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void AItemBase::Tick(float DeltaTime)
+void ALeverActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void AItemBase::UseItem()
-{
-
-}
-
-void AItemBase::ShowInfo()
-{
-	UE_LOG(LogTemp,Warning,TEXT("INFO"));
 }
 
