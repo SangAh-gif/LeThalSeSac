@@ -225,7 +225,7 @@ void ULSDogFSM::AttackState()
 	{
 		currentTime = 0.0f;
 		Anim->bAttackPlay = true;
-		target->Die();
+		//target->Die();
 	}
 
 	else
