@@ -11,10 +11,13 @@ enum class EEnemyState : uint8
 {
 	Idle,
 	Move,
+	MoveToSound,
 	Attack,
 	Damage,
 	Die,
-	Patrol
+	Patrol,
+	ReturnToPatrol,
+	DetectSound
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -78,10 +81,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
 	int32 hp = MaxHP;
 
+	FVector NoiseLocation;
+	FTimerHandle AttackTimerHandle;
+
 public:
 	void IdleState();
 
 	void MoveState();
+	
+	void MoveToSoundState();
 
 	void AttackState();
 
@@ -95,5 +103,11 @@ public:
 	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
 
 	void OnDamageProcess(int damage);
+
+	//
+	void ReturnToPatrolState();
+
+	void SetNoiseLocation(FVector NewLocation);
+	void DetectSoundState();
 
 };
