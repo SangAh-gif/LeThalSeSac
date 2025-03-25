@@ -61,6 +61,27 @@ ALSCharacter::ALSCharacter()
 	{
 		IA_Jump = TempIA_Jump.Object;
 	}
+	ConstructorHelpers::FObjectFinder<UInputAction> TempIA_Throw(TEXT("/Script/EnhancedInput.InputAction'/Game/KHH/Input/IA_LSThrow.IA_LSThrow'"));
+	if (TempIA_Throw.Succeeded())
+	{
+		IA_Throw = TempIA_Throw.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> TempIA_ChangeItem(TEXT("/Script/EnhancedInput.InputAction'/Game/KHH/Input/IA_LSChangeItem.IA_LSChangeItem'"));
+	if (TempIA_ChangeItem.Succeeded())
+	{
+		IA_ChangeItem = TempIA_ChangeItem.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UInputAction> TempIA_Use(TEXT("/Script/EnhancedInput.InputAction'/Game/KHH/Input/IA_LSUse.IA_LSUse'"));
+	if (TempIA_Use.Succeeded())
+	{
+		IA_UseItem = TempIA_Use.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UInputAction> TempIA_Scan(TEXT("/Script/EnhancedInput.InputAction'/Game/KHH/Input/IA_LSScan.IA_LSScan'"));
+	if (TempIA_Scan.Succeeded())
+	{
+		IA_Scan = TempIA_Scan.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -75,6 +96,23 @@ void ALSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (!bIsCrouched)
+	{
+		if (bIsMoving)
+		{
+			CurSoundTime += DeltaTime;
+			if (bRun)
+			{
+				loud = Runloud;
+				if(CurSoundTime >= RunSoundTime) WalkSound(loud);
+			}
+			else
+			{
+				loud = Walkloud;
+				if(CurSoundTime >= WalkSoundTime) WalkSound(loud);
+			}
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -95,6 +133,8 @@ void ALSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	if (InputSys)
 	{
 		InputSys->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALSCharacter::Move);
+		InputSys->BindAction(IA_Move, ETriggerEvent::Started, this, &ALSCharacter::ChangeMove);
+		InputSys->BindAction(IA_Move, ETriggerEvent::Completed, this, &ALSCharacter::ChangeMove);
 		InputSys->BindAction(IA_Turn, ETriggerEvent::Triggered, this, &ALSCharacter::Turn);
 		InputSys->BindAction(IA_Run, ETriggerEvent::Started, this, &ALSCharacter::RunStart);
 		InputSys->BindAction(IA_Run, ETriggerEvent::Completed, this, &ALSCharacter::RunEnd);
@@ -106,6 +146,7 @@ void ALSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		InputSys->BindAction(IA_Throw, ETriggerEvent::Started, this, &ALSCharacter::Throw);
 		InputSys->BindAction(IA_ChangeItem, ETriggerEvent::Triggered, this, &ALSCharacter::ChangeItem);
 		InputSys->BindAction(IA_UseItem, ETriggerEvent::Started, this, &ALSCharacter::Use);
+		InputSys->BindAction(IA_Scan, ETriggerEvent::Started, this, &ALSCharacter::Scan);
 	}
 }
 
@@ -114,9 +155,11 @@ void ALSCharacter::Move(const struct FInputActionValue& val)
 	FVector2D scale = val.Get<FVector2D>();
 	FVector Dir = VRCamera->GetForwardVector() * scale.X + VRCamera->GetRightVector() * scale.Y;
 	AddMovementInput(Dir);
-	if(!bRun) loud = 1;
-	else loud = 2;
-	WalkSound(loud);
+}
+
+void ALSCharacter::ChangeMove()
+{
+	bIsMoving = !bIsMoving;
 }
 
 void ALSCharacter::Turn(const struct FInputActionValue& val)
@@ -243,11 +286,32 @@ void ALSCharacter::Die()
 
 void ALSCharacter::WalkSound(float loudness)
 {
-	GetWorldTimerManager().SetTimer(WalkTimer, FTimerDelegate::CreateLambda(
-		[this, loudness]()
+	MakeNoise(loudness, this, GetActorLocation());
+	UE_LOG(LogTemp,Warning,TEXT("WALKSOUND!"));
+	CurSoundTime = 0.0f;
+}
+
+void ALSCharacter::Scan()
+{
+	TArray<FHitResult> HitInfos;
+	TArray<AItemBase*> HitItems;
+	FVector CurPos = GetActorLocation();
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+	bool bHit = GetWorld()->SweepMultiByChannel(HitInfos, CurPos, CurPos, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(ScanDist),params);
+	if (bHit)
+	{
+		for (auto hitinfo : HitInfos)
 		{
-			MakeNoise(loudness, this, GetActorLocation());
-			UE_LOG(LogTemp,Warning,TEXT("WALKSOUND!"));
+			AItemBase* item = Cast<AItemBase>(hitinfo.GetActor());
+			if (item)
+			{
+				HitItems.Emplace(item);
+			}
 		}
-	), SoundTime, true);
+		for (auto hititem : HitItems)
+		{
+			hititem->ShowInfo();
+		}
+	}
 }
