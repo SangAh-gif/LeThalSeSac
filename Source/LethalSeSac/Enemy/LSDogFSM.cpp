@@ -222,7 +222,7 @@ void ULSDogFSM::MoveState()
 
 	if (r.Result == ENavigationQueryResult::Success)
 	{
-		me->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+		me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
 		ai->MoveToLocation(destination);
 
 		if (dir.Size() < attackRange)

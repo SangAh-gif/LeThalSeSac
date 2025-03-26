@@ -26,6 +26,9 @@ class LETHALSESAC_API ALSEyelessDogAIController : public AAIController
 public:
 	ALSEyelessDogAIController();
 
+public:
+
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UAIPerceptionComponent* PerceptionComp; // 감각 시스템
@@ -53,4 +56,6 @@ public:
 	FVector NoiseLocation; 
 
 	bool bHearNoise = false;
+
+	class LSDogFSM* dogFSM;
 };

@@ -36,8 +36,17 @@ ALSEyelessDogAIController::ALSEyelessDogAIController()
 	}
 
 	PerceptionComp->OnPerceptionUpdated.AddDynamic(this, &ALSEyelessDogAIController::PerceptionUpdated);
+	
+
 }
 
+
+void ALSEyelessDogAIController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//dogFSM = Cast<ULSDogFSM>()
+}
 
 void ALSEyelessDogAIController::PerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 {
