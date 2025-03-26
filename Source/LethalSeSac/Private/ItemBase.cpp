@@ -4,6 +4,7 @@
 #include "ItemBase.h"
 #include "Components/BoxComponent.h"
 #include "Components/ChildActorComponent.h"
+#include "ItemInfoActor.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -23,7 +24,7 @@ AItemBase::AItemBase()
 
 	ItemInfoComp = CreateDefaultSubobject<UChildActorComponent>(TEXT("ItemInfoComp"));
 	ItemInfoComp->SetupAttachment(RootComponent);
-	ConstructorHelpers::FClassFinder<AActor> TempInfo(TEXT("/Script/Engine.Blueprint'/Game/KHH/Blueprints/BP_ItemInfo.BP_ItemInfo_C'"));
+	ConstructorHelpers::FClassFinder<AItemInfoActor> TempInfo(TEXT("/Script/Engine.Blueprint'/Game/KHH/Blueprints/BP_ItemInfo.BP_ItemInfo_C'"));
 	if (TempInfo.Succeeded())
 	{
 		ItemInfoComp->SetChildActorClass(TempInfo.Class);
@@ -35,7 +36,11 @@ void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
 	ItemInfoComp->SetVisibility(false);
-	
+	AItemInfoActor* ItemInfo = Cast<AItemInfoActor>(ItemInfoComp->GetChildActor());
+	if (ItemInfo)
+	{
+		ItemInfo->SetInfo(ItemName, curVal);
+	}
 }
 
 // Called every frame

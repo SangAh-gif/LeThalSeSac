@@ -7,10 +7,11 @@ Ajunk::Ajunk()
 {
 	minVal = 10;
 	maxVal = 100;
+	curVal = FMath::RandRange(minVal, maxVal);
 }
 
 void Ajunk::BeginPlay()
 {
 	Super::BeginPlay();
-	curVal = FMath::RandRange(minVal,maxVal);
+	
 }

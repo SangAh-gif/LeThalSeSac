@@ -33,6 +33,8 @@ public:
 	void ShowInfo();
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FString ItemName;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int32 minVal= 0;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int32 maxVal = 0;
@@ -40,9 +42,14 @@ public:
 	int32 curVal = 0;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UImage* Img;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class AItemInfoActor* ItemInfoAct;
+	
 
 	UPROPERTY(VisibleAnywhere)
 	class UChildActorComponent* ItemInfoComp;
+
+
 
 	bool bShowInfo = false;
 	float curtime = 0;

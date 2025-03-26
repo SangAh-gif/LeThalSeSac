@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ItemBase.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ALSCharacter::ALSCharacter()
@@ -287,12 +288,33 @@ void ALSCharacter::Die()
 void ALSCharacter::WalkSound(float loudness)
 {
 	MakeNoise(loudness, this, GetActorLocation());
-	UE_LOG(LogTemp,Warning,TEXT("WALKSOUND!"));
+	//UE_LOG(LogTemp,Warning,TEXT("WALKSOUND!"));
 	CurSoundTime = 0.0f;
 }
 
 void ALSCharacter::Scan()
 {
+	TArray<AActor*> postArr;
+	UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), APostProcessVolume::StaticClass(), TEXT("Scan"), postArr);
+	for (auto post : postArr)
+	{
+		APostProcessVolume* scanPost = Cast<APostProcessVolume>(post);
+		if (scanPost)
+		{
+			scanPost->bUnbound = true;
+		}
+		GetWorld()->GetTimerManager().SetTimer(ScanTimer, FTimerDelegate::CreateLambda(
+			[this, scanPost]()
+			{
+				CurScanTime += GetWorld()->DeltaTimeSeconds;
+				if (CurScanTime >= ScanTime)
+				{
+					scanPost->bUnbound = false;
+					GetWorldTimerManager().ClearTimer(ScanTimer);
+					CurScanTime = 0;
+				}
+			}), 0.02f, true);
+	}
 	TArray<FHitResult> HitInfos;
 	TArray<AItemBase*> HitItems;
 	FVector CurPos = GetActorLocation();

@@ -90,7 +90,9 @@ public: // 이동 및 회전
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurSoundTime = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CurTime = 0.0f;
+	float CurScanTime = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ScanTime = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bRun = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -106,7 +108,7 @@ public: // 이동 및 회전
 	int32 Sta = 100;
 	bool bIsMoving = false;
 
-	FTimerHandle WalkTimer;
+	FTimerHandle ScanTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class AItemBase*> ItemArray;
