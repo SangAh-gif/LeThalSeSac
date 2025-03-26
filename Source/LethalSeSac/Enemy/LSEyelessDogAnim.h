@@ -15,6 +15,8 @@ class LETHALSESAC_API ULSEyelessDogAnim : public UAnimInstance
 {
 	GENERATED_BODY()
 
+public:
+	ULSEyelessDogAnim();
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
