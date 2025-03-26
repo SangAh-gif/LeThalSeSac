@@ -73,6 +73,11 @@ void ULSDogFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		MoveState();
 	}
 		break;
+	case EEnemyState::MoveToSound:
+	{
+		MoveState();
+	}
+	break;
 	case EEnemyState::Attack:
 	{
 		AttackState();
@@ -93,6 +98,16 @@ void ULSDogFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		PatrolState();
 	}
 	break;
+	case EEnemyState::ReturnToPatrol:
+	{
+		ReturnToPatrolState();
+	}
+	break;
+	case EEnemyState::DetectSound:
+	{
+		DetectSoundState();
+	}
+	break;
 	default:
 		break;
 	}
@@ -109,6 +124,19 @@ void ULSDogFSM::IdleState()
 		Anim->AnimState = mState;
 		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
 	}
+}
+
+void ULSDogFSM::SetNoiseLocation(FVector NewLocation)
+{
+	NoiseLocation = NewLocation;
+	mState = EEnemyState::DetectSound;
+}
+
+void ULSDogFSM::DetectSoundState()
+{
+	if (NoiseLocation.IsZero()) return;
+
+	mState = EEnemyState::MoveToSound;
 }
 
 void ULSDogFSM::MoveState()
@@ -174,6 +202,7 @@ void ULSDogFSM::MoveState()
 	FVector destination = target->GetActorLocation();
 	FVector         dir = destination - me->GetActorLocation();
 
+
 	FRotator newRotation = dir.Rotation();
 	newRotation = UKismetMathLibrary::MakeRotFromXZ(dir, me->GetActorUpVector());
 	newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
@@ -193,7 +222,7 @@ void ULSDogFSM::MoveState()
 
 	if (r.Result == ENavigationQueryResult::Success)
 	{
-		me->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+		me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
 		ai->MoveToLocation(destination);
 
 		if (dir.Size() < attackRange)
@@ -204,6 +233,20 @@ void ULSDogFSM::MoveState()
 			Anim->bAttackPlay = true;
 			currentTime = attackDelayTime;
 		}
+	}
+}
+
+void ULSDogFSM::MoveToSoundState()
+{
+	if (!ai || !me) return;
+
+	ai->MoveToLocation(NoiseLocation);
+
+	// 만약 목표 지점에 도착했다면 공격 상태로 전환
+	float Distance = FVector::Dist(me->GetActorLocation(), NoiseLocation);
+	if (Distance < 100.0f) // 100 유닛 이내로 도착하면 공격 시작
+	{
+		mState = EEnemyState::Attack;
 	}
 }
 
@@ -219,36 +262,43 @@ void ULSDogFSM::AttackState()
 	newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 0.2f);
 	me->SetActorRotation(newRotation);*/
 
-	currentTime += GetWorld()->GetDeltaSeconds();
+	//currentTime += GetWorld()->GetDeltaSeconds();
 
-	if (currentTime >= attackDelayTime)
-	{
-		currentTime = 0.0f;
-		Anim->bAttackPlay = true;
-		//target->Die();
-	}
+	//if (currentTime >= attackDelayTime)
+	//{
+	//	currentTime = 0.0f;
+	//	Anim->bAttackPlay = true;
+	//	//target->Die();
+	//}
 
-	else
-	{
-		float distance = FVector::Distance(target->GetActorLocation(), me->GetActorLocation());
+	//else
+	//{
+	//	float distance = FVector::Distance(target->GetActorLocation(), me->GetActorLocation());
 
-		if (distance > attackRange)
+	//	if (distance > attackRange)
+	//	{
+	//		mState = EEnemyState::Move;
+
+	//		Anim->AnimState = mState;
+
+	//		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+	//	}
+	//}
+
+	if (!ai || !me) return;
+
+	// 공격 애니메이션 실행
+	Anim->bAttackPlay = true;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		AttackTimerHandle,
+		[this]()
 		{
-			mState = EEnemyState::Move;
-
-			Anim->AnimState = mState;
-
-			GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
-		}
-	}
-
-	/*if (dir.Size() > attackRange)
-	{
-		mState = EEnemyState::Move;
-		Anim->AnimState =mState;
-		currentTime = 0;
-	}*/
+			mState = EEnemyState::ReturnToPatrol;
+		},
+		2.0f, false); // 공격 후 3초 뒤 순찰로 복귀
 }
+
 
 void ULSDogFSM::DamageState()
 {
@@ -280,37 +330,12 @@ void ULSDogFSM::PatrolState()
 		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
 	}
 
-	//if (!ai)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("AI Controller is null in PatrolState!"));
-	//	return;
-	//}
+	//if (!me || !ai) return;
 
-	//me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
-
-	//if (!GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos))
+	//if (!ai->IsMoving()) // 이동이 끝났다면 새로운 랜덤 지점으로 이동
 	//{
-	//	UE_LOG(LogTemp, Error, TEXT("Failed to find a valid patrol position!"));
-	//	return;
-	//}
-
-	//EPathFollowingRequestResult::Type result = ai->MoveToLocation(randomPos);
-
-	//if (result == EPathFollowingRequestResult::RequestSuccessful)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("AI started moving to patrol position."));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("AI move request failed!"));
-	//	return;
-	//}
-
-	//// 목표에 도착했는지 확인
-	//if (ai->GetMoveStatus() == EPathFollowingStatus::Idle)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("AI has reached the patrol position. Finding new destination."));
-	//	GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+	//	FVector RandomPoint = GetRandomPatrolPoint();
+	//	ai->MoveToLocation(RandomPoint);
 	//}
 }
 
@@ -342,4 +367,11 @@ void ULSDogFSM::OnDamageProcess(int damage)
 		me->PlayAnimMontage(Anim->EnemyMongtage, 1.0f, TEXT("Die"));
 	}
 }
+
+void ULSDogFSM::ReturnToPatrolState()
+{
+	mState = EEnemyState::Patrol;
+}
+
+
 

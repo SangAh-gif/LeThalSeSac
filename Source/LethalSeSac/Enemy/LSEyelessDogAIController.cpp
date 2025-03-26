@@ -27,8 +27,8 @@ ALSEyelessDogAIController::ALSEyelessDogAIController()
 	if (HearingConfig)
 	{
 		HearingConfig->HearingRange = 600.0f; // 감지 거리 조절 
-		HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-		HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
+		HearingConfig->DetectionByAffiliation.bDetectEnemies    = true;
+		HearingConfig->DetectionByAffiliation.bDetectNeutrals   = true;
 		HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
 		PerceptionComp->ConfigureSense(*HearingConfig);
@@ -36,61 +36,74 @@ ALSEyelessDogAIController::ALSEyelessDogAIController()
 	}
 
 	PerceptionComp->OnPerceptionUpdated.AddDynamic(this, &ALSEyelessDogAIController::PerceptionUpdated);
+	
+
 }
 
+
+void ALSEyelessDogAIController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//dogFSM = Cast<ULSDogFSM>()
+}
 
 void ALSEyelessDogAIController::PerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 {
 	if(!PerceptionComp) return;
 
+	//for (AActor* UpdatedActor : UpdatedActors)
+	//{
+	//	if (!UpdatedActor->ActorHasTag("enemy"))
+	//	{
+	//		NoiseLocation = FVector::ZeroVector; // 감지된 위치 저장
+
+	//		
+
+	//		if(CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Damage) || CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Hearing))
+	//		{
+	//			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("hi"));
+
+	//			ALSEyelessDog* enemy = Cast<ALSEyelessDog>(GetCharacter());
+	//			if (enemy)
+	//			{
+	//				enemy->FindComponentByClass<ULSDogFSM>()->mState = EEnemyState::Move;
+	//			}
+	//			if (!NoiseLocation.IsZero())
+	//			{
+	//				MoveToLocation(NoiseLocation);
+	//			}
+	//		}
+	//	}
+	//}
 	for (AActor* UpdatedActor : UpdatedActors)
 	{
-		if (!UpdatedActor->ActorHasTag("enemy"))
-		{
-			FVector NoiseLocation = FVector::ZeroVector; // 감지된 위치 저장
-
-			if(CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Damage) || CanSenseActor(UpdatedActor, enemyAISenseEyelessDog::Hearing))
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("hello"));
-
-				ALSEyelessDog* enemy = Cast<ALSEyelessDog>(GetCharacter());
-				if (enemy)
-				{
-					enemy->FindComponentByClass<ULSDogFSM>()->mState = EEnemyState::Move;
-				}
-				if (!NoiseLocation.IsZero())
-				{
-					MoveToLocation(NoiseLocation);
-				}
-			}
-		}
-	}
-
-	/*for (AActor* UpdatedActor : UpdatedActors)
-	{
-		if (!UpdatedActor->ActorHasTag("enemy"))
+		if (!UpdatedActor->ActorHasTag("enemy")) // 적이 아닐 때만 반응
 		{
 			FActorPerceptionBlueprintInfo Info;
 			PerceptionComp->GetActorsPerception(UpdatedActor, Info);
-			FVector NoiseLocation = FVector::ZeroVector;
 
 			for (const FAIStimulus& Stimulus : Info.LastSensedStimuli)
 			{
 				if (UAIPerceptionSystem::GetSenseClassForStimulus(this, Stimulus) == UAISense_Hearing::StaticClass())
 				{
 					NoiseLocation = Stimulus.StimulusLocation;
+					UE_LOG(LogTemp, Warning, TEXT("소리 감지! 위치: %s"), *NoiseLocation.ToString());
+
 					ALSEyelessDog* enemy = Cast<ALSEyelessDog>(GetCharacter());
 					if (enemy)
 					{
-						enemy->FindComponentByClass<ULSDogFSM>()->mState = EEnemyState::Move;
-						MoveToLocation(NoiseLocation);
-						UE_LOG(LogTemp, Log, TEXT("Moving to noise at %s"), *NoiseLocation.ToString());
+						ULSDogFSM* FSM = enemy->FindComponentByClass<ULSDogFSM>();
+						if (FSM)
+						{
+							FSM->SetNoiseLocation(NoiseLocation);
+						}
 					}
-					break;
 				}
 			}
 		}
-	}*/
+	}
+	
 }
 
 bool ALSEyelessDogAIController::CanSenseActor(AActor* actor, enemyAISenseEyelessDog AIPerceptionSense)
@@ -125,5 +138,20 @@ bool ALSEyelessDogAIController::CanSenseActor(AActor* actor, enemyAISenseEyeless
 		}
 	}
 	return false;
+}
+
+void ALSEyelessDogAIController::OnHearNoise(APawn* NoiseInstigator, const FVector& Location, float Volume)
+{
+	ULSDogFSM* FSM = Cast<ULSDogFSM>(GetPawn()->GetComponentByClass(ULSDogFSM::StaticClass()));
+
+	if (FSM)
+	{
+		FSM->SetNoiseLocation(Location);
+	}
+}
+
+FVector ALSEyelessDogAIController::GetNoisLocation()
+{
+	return NoiseLocation;
 }
 
