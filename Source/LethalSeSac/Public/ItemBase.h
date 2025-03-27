@@ -55,4 +55,10 @@ public:
 	float curtime = 0;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Info)
 	float ShowTime = 3;
+
+	FTimerHandle ShowTimer;
+	FTimerHandle ShrinkTimer;
+	float scale = 0;
+
+	bool isChecked = false;
 };

@@ -28,8 +28,6 @@ AItemInfoActor::AItemInfoActor()
 	ItemValComp->SetRelativeRotation(FRotator(0, 180, 0));
 	ItemValComp->SetWorldSize(10);
 
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-	MeshComp->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned

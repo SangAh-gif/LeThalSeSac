@@ -35,7 +35,8 @@ AItemBase::AItemBase()
 void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
-	ItemInfoComp->SetVisibility(false);
+	//ItemInfoComp->SetVisibility(false);
+	ItemInfoComp->SetRelativeScale3D(FVector(1,1,0));
 	AItemInfoActor* ItemInfo = Cast<AItemInfoActor>(ItemInfoComp->GetChildActor());
 	if (ItemInfo)
 	{
@@ -54,7 +55,19 @@ void AItemBase::Tick(float DeltaTime)
 		if (curtime >= ShowTime)
 		{
 			bShowInfo = false;
-			ItemInfoComp->SetVisibility(false);
+			//ItemInfoComp->SetVisibility(false);
+			GetWorld()->GetTimerManager().SetTimer(ShrinkTimer, FTimerDelegate::CreateLambda(
+				[this]()
+				{
+					scale = FMath::Lerp(scale, 0, 20 * GetWorld()->DeltaTimeSeconds);
+					ItemInfoComp->SetRelativeScale3D(FVector(scale));
+					if (scale <= 0.05)
+					{
+						scale = 0;
+						ItemInfoComp->SetRelativeScale3D(FVector(scale));
+						GetWorldTimerManager().ClearTimer(ShrinkTimer);
+					}
+				}), 0.02f, true);
 			curtime = 0;
 		}
 	}
@@ -69,7 +82,18 @@ void AItemBase::ShowInfo()
 {
 	FString str = GetActorNameOrLabel();
 	bShowInfo = true;
-	ItemInfoComp->SetVisibility(true);
-	UE_LOG(LogTemp,Warning,TEXT("%s"),*str);
+	GetWorld()->GetTimerManager().SetTimer(ShowTimer, FTimerDelegate::CreateLambda(
+		[this]()
+		{
+			scale += 0.2f;
+			ItemInfoComp->SetRelativeScale3D(FVector(scale));
+			if (scale >= 1)
+			{
+				scale = 1;
+				ItemInfoComp->SetRelativeScale3D(FVector(scale));
+				GetWorldTimerManager().ClearTimer(ShowTimer);
+			}
+		}), 0.02f, true);
+	
 }
 
