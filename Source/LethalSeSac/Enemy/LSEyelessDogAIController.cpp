@@ -26,7 +26,7 @@ ALSEyelessDogAIController::ALSEyelessDogAIController()
 
 	if (HearingConfig)
 	{
-		HearingConfig->HearingRange = 600.0f; // 감지 거리 조절 
+		HearingConfig->HearingRange = 1000.0f; // 감지 거리 조절 
 		HearingConfig->DetectionByAffiliation.bDetectEnemies    = true;
 		HearingConfig->DetectionByAffiliation.bDetectNeutrals   = true;
 		HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
