@@ -36,7 +36,6 @@ ALSEyelessDogAIController::ALSEyelessDogAIController()
 	}
 
 	PerceptionComp->OnPerceptionUpdated.AddDynamic(this, &ALSEyelessDogAIController::PerceptionUpdated);
-	
 
 }
 

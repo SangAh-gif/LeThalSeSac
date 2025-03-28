@@ -129,7 +129,7 @@ void ULSDogFSM::IdleState()
 void ULSDogFSM::SetNoiseLocation(FVector NewLocation)
 {
 	NoiseLocation = NewLocation;
-	mState = EEnemyState::DetectSound;
+	mState = EEnemyState::Move;
 }
 
 void ULSDogFSM::DetectSoundState()
@@ -141,46 +141,49 @@ void ULSDogFSM::DetectSoundState()
 
 void ULSDogFSM::MoveState()
 {
+	// 체크 
+	// 
+	if (UKismetMathLibrary::EqualEqual_VectorVector(NoiseLocation, me->GetActorLocation(), 0.00001f))
+	{
+		IdleState();
+	}
+	 //타겟 목적지가 필요하다.
+	FVector desttination = NoiseLocation;
 
-	// 바로 나에게 오는 것 
+
+	// 방향
+	FVector dir = desttination - me->GetActorLocation();
+
+	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+
+	// 목적지 길찾기 경로 데이터 검색
+	FPathFindingQuery query;
+	FAIMoveRequest req;
+
+	// 목적지에서 인지할 수 있는 범위
+	req.SetAcceptanceRadius(3);
+	req.SetGoalLocation(desttination);
+
+	// 길 찾기를 위한 쿼리 생성
+	ai->BuildPathfindingQuery(req, query);
 	
-	
-	// 타겟 목적지가 필요하다.
-	//FVector desttination = target->GetActorLocation();
+	// 길찾기 결과 가져오기
+	FPathFindingResult r = ns->FindPathSync(query);
 
-	//// 방향
-	//FVector dir = desttination - me->GetActorLocation();
+	// 목적지까지 길 찾기 성공 여부 확인
+	if (r.Result == ENavigationQueryResult::Success)
+	{
+		ai->MoveToLocation(desttination);
+	}
+	else
+	{
+		auto result = ai->MoveToLocation(randomPos);
 
-	//auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-
-	//// 목적지 길찾기 경로 데이터 검색
-	//FPathFindingQuery query;
-	//FAIMoveRequest req;
-
-	//// 목적지에서 인지할 수 있는 범위
-	//req.SetAcceptanceRadius(3);
-	//req.SetGoalLocation(desttination);
-
-	//// 길 찾기를 위한 쿼리 생성
-	//ai->BuildPathfindingQuery(req, query);
-	//
-	//// 길찾기 결과 가져오기
-	//FPathFindingResult r = ns->FindPathSync(query);
-
-	//// 목적지까지 길 찾기 성공 여부 확인
-	//if (r.Result == ENavigationQueryResult::Success)
-	//{
-	//	ai->MoveToLocation(desttination);
-	//}
-	//else
-	//{
-	//	auto result = ai->MoveToLocation(randomPos);
-
-	//	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
-	//	{
-	//		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
-	//	}
-	//}
+		if (result == EPathFollowingRequestResult::AlreadyAtGoal)
+		{
+			GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+		}
+	}
 
 	//if (dir.Size() < attackRange)
 	//{
@@ -198,42 +201,42 @@ void ULSDogFSM::MoveState()
 
 	
 
-	if (!target || !me) return;
-	FVector destination = target->GetActorLocation();
-	FVector         dir = destination - me->GetActorLocation();
+	//if (!target || !me) return;
+	//FVector destination = NoiseLocation;
+	//FVector         dir = destination - me->GetActorLocation();
 
 
-	FRotator newRotation = dir.Rotation();
-	newRotation = UKismetMathLibrary::MakeRotFromXZ(dir, me->GetActorUpVector());
-	newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
-	me->SetActorRotation(newRotation);
+	////FRotator newRotation = dir.Rotation();
+	////newRotation = UKismetMathLibrary::MakeRotFromXZ(dir, me->GetActorUpVector());
+	////newRotation = FMath::RInterpTo(me->GetActorRotation(), newRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
+	////me->SetActorRotation(newRotation);
 
-	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-	if (!ns) return;
+	//auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	//if (!ns) return;
 
-	FPathFindingQuery query;
-	FAIMoveRequest req;
+	//FPathFindingQuery query;
+	//FAIMoveRequest req;
 
-	req.SetAcceptanceRadius(3);
-	req.SetGoalLocation(destination);
+	//req.SetAcceptanceRadius(3);
+	//req.SetGoalLocation(destination);
 
-	ai->BuildPathfindingQuery(req, query);
-	FPathFindingResult r = ns->FindPathSync(query);
+	//ai->BuildPathfindingQuery(req, query);
+	//FPathFindingResult r = ns->FindPathSync(query);
 
-	if (r.Result == ENavigationQueryResult::Success)
-	{
-		me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
-		ai->MoveToLocation(destination);
+	//if (r.Result == ENavigationQueryResult::Success)
+	//{
+	//	me->GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	//	ai->MoveToLocation(destination);
 
-		if (dir.Size() < attackRange)
-		{
-			ai->StopMovement();
-			mState = EEnemyState::Attack;
-			Anim->AnimState = mState;
-			Anim->bAttackPlay = true;
-			currentTime = attackDelayTime;
-		}
-	}
+	//	if (dir.Size() < attackRange)
+	//	{
+	//		ai->StopMovement();
+	//		mState = EEnemyState::Attack;
+	//		Anim->AnimState = mState;
+	//		Anim->bAttackPlay = true;
+	//		currentTime = attackDelayTime;
+	//	}
+	//}
 }
 
 void ULSDogFSM::MoveToSoundState()
@@ -248,6 +251,11 @@ void ULSDogFSM::MoveToSoundState()
 	{
 		mState = EEnemyState::Attack;
 	}
+	else if (UKismetMathLibrary::EqualEqual_VectorVector(NoiseLocation, me->GetActorLocation(), 0.00001f))
+	{
+		ReturnToPatrolState();
+	}
+
 }
 
 void ULSDogFSM::AttackState()
@@ -370,7 +378,8 @@ void ULSDogFSM::OnDamageProcess(int damage)
 
 void ULSDogFSM::ReturnToPatrolState()
 {
-	mState = EEnemyState::Patrol;
+	mState = EEnemyState::Idle;
+	Anim->AnimState = mState;
 }
 
 

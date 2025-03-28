@@ -4,6 +4,11 @@
 #include "LSEyelessDogAnim.h"
 #include "LSEyelessDog.h"
 
+ULSEyelessDogAnim::ULSEyelessDogAnim()
+{
+	
+}
+
 void ULSEyelessDogAnim::AnimNotify_AttackEnd()
 {
 
