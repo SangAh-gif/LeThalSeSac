@@ -29,8 +29,7 @@ public:
 	class UTextRenderComponent* ItemNameComp;
 	UPROPERTY(EditAnywhere)
 	class UTextRenderComponent* ItemValComp;
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* MeshComp;
+
 
 	void SetInfo(FString Name, int32 val);
 };

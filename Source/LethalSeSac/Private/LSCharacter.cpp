@@ -20,6 +20,7 @@ ALSCharacter::ALSCharacter()
 
 	VRCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("VRCamera"));
 	VRCamera->SetupAttachment(RootComponent);
+	VRCamera->SetRelativeLocation(FVector(0,0,50));
 
 	scene = CreateDefaultSubobject<USceneComponent>(TEXT("scene"));
 	scene->SetupAttachment(RootComponent);
