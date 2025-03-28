@@ -161,7 +161,7 @@ void ULSDogFSM::MoveState()
 	FAIMoveRequest req;
 
 	// 목적지에서 인지할 수 있는 범위
-	req.SetAcceptanceRadius(3);
+	req.SetAcceptanceRadius(7);
 	req.SetGoalLocation(desttination);
 
 	// 길 찾기를 위한 쿼리 생성
@@ -251,7 +251,7 @@ void ULSDogFSM::MoveToSoundState()
 	{
 		mState = EEnemyState::Attack;
 	}
-	else if (UKismetMathLibrary::EqualEqual_VectorVector(NoiseLocation, me->GetActorLocation(), 0.00001f))
+	else if (UKismetMathLibrary::EqualEqual_VectorVector(NoiseLocation, me->GetActorLocation(), 0.00010f))
 	{
 		ReturnToPatrolState();
 	}
@@ -331,7 +331,7 @@ void ULSDogFSM::DieState()
 
 void ULSDogFSM::PatrolState()
 {
-	me->GetCharacterMovement()->MaxWalkSpeed = 100.0f;
+	me->GetCharacterMovement()->MaxWalkSpeed = 200.0f;
 	auto result = ai->MoveToLocation(randomPos);
 	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
 	{
