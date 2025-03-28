@@ -29,6 +29,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* RootComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 totVal = 0;
 
 	UFUNCTION()
