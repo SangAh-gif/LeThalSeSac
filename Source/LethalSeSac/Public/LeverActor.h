@@ -24,7 +24,18 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	UPROPERTY(EditAnywhere)
+	class USceneComponent* RootComp;
+	UPROPERTY(EditAnywhere)
 	class UBoxComponent* BoxComp;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* MeshComp;
+
+	UPROPERTY(EditAnywhere)
+	bool bInSpace = true;
+
+	void InteractLever();
+
+	class ALSGameModeBase* GM;
+
+	
 };

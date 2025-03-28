@@ -74,6 +74,7 @@ public: // 이동 및 회전
 	void Die();
 	void WalkSound(float loud);
 	void Scan();
+	void EndGame();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 1000;
@@ -112,5 +113,10 @@ public: // 이동 및 회전
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class AItemBase*> ItemArray;
+
+	class ALSGameModeBase* GM;
+
+	bool bIsDead = false;
+
 
 };

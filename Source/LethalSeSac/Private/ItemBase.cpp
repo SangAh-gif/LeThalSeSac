@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/ChildActorComponent.h"
 #include "ItemInfoActor.h"
+#include "LSGameModeBase.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -42,16 +43,18 @@ void AItemBase::BeginPlay()
 	{
 		ItemInfo->SetInfo(ItemName, curVal);
 	}
+
 }
 
 // Called every frame
 void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	if (bShowInfo)
 	{
 		curtime += DeltaTime;
+		if (curtime >= ShowTime)
 		if (curtime >= ShowTime)
 		{
 			bShowInfo = false;
