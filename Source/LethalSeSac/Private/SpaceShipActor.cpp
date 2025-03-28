@@ -19,6 +19,7 @@ ASpaceShipActor::ASpaceShipActor()
 	CheckItemComp->SetupAttachment(RootComponent);
 	CheckItemComp->SetRelativeLocation(FVector(15.000000, 730.000000, 275.000000));
 	CheckItemComp->SetRelativeScale3D(FVector(9.500000, 29.000000, 7.000000));
+	CheckItemComp->SetCollisionProfileName(TEXT("itemcheck"));
 
 	CheckItemComp->OnComponentBeginOverlap.AddDynamic(this, &ASpaceShipActor::OnSpaceShipOverlap);
 	CheckItemComp->OnComponentEndOverlap.AddDynamic(this, &ASpaceShipActor::OnSpaceShipEndOverlap);
@@ -43,6 +44,7 @@ void ASpaceShipActor::OnSpaceShipOverlap(UPrimitiveComponent* OverlappedComponen
 	AItemBase* item = Cast<AItemBase>(OtherActor);
 	if (item)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ITEM IN!!!!!!!!!!!!"));
 		totVal += item->curVal;
 	}
 }
@@ -52,6 +54,7 @@ void ASpaceShipActor::OnSpaceShipEndOverlap(UPrimitiveComponent* OverlappedCompo
 	AItemBase* item = Cast<AItemBase>(OtherActor);
 	if (item)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ITEM OUT!!!!!!!!!!!!"));
 		totVal -= item->curVal;
 	}
 }

@@ -11,6 +11,9 @@
 #include "ItemBase.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "LSGameModeBase.h"
+#include "SpaceShipActor.h"
+#include "LeverActor.h"
 
 // Sets default values
 ALSCharacter::ALSCharacter()
@@ -91,6 +94,8 @@ void ALSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	ItemArray.SetNum(4);
+	Super::BeginPlay();
+	GM = Cast<ALSGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 // Called every frame
@@ -208,11 +213,16 @@ void ALSCharacter::Interact()
 				{
 					ItemArray[SelectedIndex] = item;
 					item->BoxComp->SetSimulatePhysics(false);
-					item->BoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					//item->BoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 					item->MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 					item->AttachToComponent(scene, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 				}
 				break;
+			}
+			ALeverActor* lever = Cast<ALeverActor>(HitInfo.GetActor());
+			if (lever)
+			{
+				lever->InteractLever();
 			}
 		}
 			
@@ -223,7 +233,7 @@ void ALSCharacter::Throw()
 {
 	if(!ItemArray[SelectedIndex]) return;
 	ItemArray[SelectedIndex]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	ItemArray[SelectedIndex]->BoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//ItemArray[SelectedIndex]->BoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ItemArray[SelectedIndex]->BoxComp->SetSimulatePhysics(true);
 	ItemArray[SelectedIndex]->MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ItemArray[SelectedIndex] = nullptr;
@@ -244,12 +254,12 @@ void ALSCharacter::SelectItem(int32 index, int32 preIndex)
 {
 	if (ItemArray[preIndex])
 	{
-		//ItemArray[preIndex]->BoxComp->SetVisibility(false);
+		ItemArray[preIndex]->BoxComp->SetVisibility(false);
 		ItemArray[preIndex]->SetActorHiddenInGame(true);
 	}
 	if(ItemArray[index])
 	{
-		//ItemArray[index]->BoxComp->SetVisibility(true);
+		ItemArray[index]->BoxComp->SetVisibility(true);
 		ItemArray[index]->SetActorHiddenInGame(false);
 	}
 }
@@ -271,6 +281,11 @@ bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
 	FVector EndPos = StartPos + VRCamera->GetForwardVector() * InteractDist;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
+	for (int i = 0; i < 4; ++i)
+	{
+		if(ItemArray[i])
+		params.AddIgnoredActor(ItemArray[i]);
+	}
 	bool bHit = GetWorld()->SweepMultiByChannel(HitInfos, StartPos, EndPos, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(50), params);
 
 	return bHit;
@@ -278,6 +293,8 @@ bool ALSCharacter::drawInteractLine(TArray<FHitResult>& HitInfos)
 
 void ALSCharacter::Die()
 {
+	bIsDead = true;
+	EndGame();
 	APlayerController* pc = Cast<APlayerController>(Controller);
 	if (pc)
 	{
@@ -337,4 +354,22 @@ void ALSCharacter::Scan()
 			hititem->ShowInfo();
 		}
 	}
+}
+
+void ALSCharacter::EndGame()
+{
+	GM->GameDay --;
+	GM->bInSpace = true;
+	if (bIsDead)
+	{
+		GM->TotValue = 0;
+	}
+	else
+	{
+		ASpaceShipActor* ss = Cast<ASpaceShipActor>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpaceShipActor::StaticClass()));
+		GM->TotValue = ss->totVal;
+	}
+	GM->SaveGameData();
+
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("StartMap"));
 }
