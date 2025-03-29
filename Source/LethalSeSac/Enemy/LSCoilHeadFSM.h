@@ -13,7 +13,7 @@ enum class ECoilHeadState : uint8
 	Patrol,
 	Attack,
 	Move,
-	StopMove
+	LookAtMe
 };
 
 
@@ -55,12 +55,23 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 	float IdleDelayTime = 2.0f;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float currentTIme = 0.0f; 
+	float currentTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float attackDelayTime = 2.0f;
 
 	UPROPERTY(EditAnywhere, Category = FSM)
-	float traceRange = 500.0f;
+	float damageDelayTime = 2.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float attackRange = 150.0f;
+
+	UPROPERTY(EditAnywhere, Category =FSM)
+	float  traceRange = 500.0f;
+
+
 
 public:
 	void IdleState();
@@ -69,8 +80,9 @@ public:
 
 	void PatrolState();
 
-	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
+	void AttackState();
 
-	
-		
+	void LookAtMeState();
+
+	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
 };

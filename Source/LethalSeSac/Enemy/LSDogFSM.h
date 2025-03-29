@@ -100,7 +100,4 @@ public:
 	void OnDamageProcess(int damage);
 
 	void SetNoiseLocation(FVector NewLocation);
-
-
-
 };

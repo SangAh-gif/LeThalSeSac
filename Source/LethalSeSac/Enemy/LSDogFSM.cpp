@@ -25,26 +25,20 @@ ULSDogFSM::ULSDogFSM()
 	// ...
 }
 
-
 // Called when the game starts
 void ULSDogFSM::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// ...
-
-	// 월드에서 Player 찾아오기 
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), ALSCharacter::StaticClass());
 
 	target = Cast<ALSCharacter>(actor);
 
-	// 소유 객체
 	me = Cast<ALSEyelessDog>(GetOwner());
 
 	Anim = Cast<ULSEyelessDogAnim>(me->GetMesh()->GetAnimInstance());
 
-
-	//ai = Cast<ALSEyelessDogAIController>(me->GetController());
 	ai = Cast<ALSEyelessDogAIController>(me->GetController());
 
 }
@@ -56,10 +50,8 @@ void ULSDogFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-	
-	// 실행창에 상태 메세지 출력하기 
-	FString logMsg = UEnum::GetValueAsString(mState);
-	GEngine->AddOnScreenDebugMessage(0, 1, FColor::Red, logMsg);
+	//FString logMsg = UEnum::GetValueAsString(mState);
+	//GEngine->AddOnScreenDebugMessage(0, 1, FColor::Red, logMsg);
 
 	switch (mState)
 	{
@@ -123,31 +115,25 @@ void ULSDogFSM::MoveState()
 	{
 		IdleState();
 	}
-	 //타겟 목적지가 필요하다.
+
 	FVector desttination = NoiseLocation;
 
 	me->GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
 
-	// 방향
 	FVector dir = desttination - me->GetActorLocation();
 
 	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 
-	// 목적지 길찾기 경로 데이터 검색
 	FPathFindingQuery query;
 	FAIMoveRequest req;
 
-	// 목적지에서 인지할 수 있는 범위
 	req.SetAcceptanceRadius(7);
 	req.SetGoalLocation(desttination);
 
-	// 길 찾기를 위한 쿼리 생성
 	ai->BuildPathfindingQuery(req, query);
-	
-	// 길찾기 결과 가져오기
+
 	FPathFindingResult r = ns->FindPathSync(query);
 
-	// 목적지까지 길 찾기 성공 여부 확인
 	if (r.Result == ENavigationQueryResult::Success)
 	{
 		ai->MoveToLocation(desttination);
@@ -164,7 +150,6 @@ void ULSDogFSM::MoveState()
 
 	if (dir.Size() < attackRange)
 	{
-		// 길 찾기 기능 정지
 		ai->StopMovement();
 
 		mState = EEnemyState::Attack;
@@ -190,7 +175,6 @@ void ULSDogFSM::AttackState()
 	}
 	else
 	{
-
 		float distance = FVector::Distance(target->GetActorLocation(), me->GetActorLocation());
 
 		if (distance > attackRange)
@@ -223,7 +207,6 @@ void ULSDogFSM::DieState()
 	ai->isDead = true;
 
 	me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
-	
 }
 
 void ULSDogFSM::PatrolState()
@@ -232,7 +215,7 @@ void ULSDogFSM::PatrolState()
 	auto result = ai->MoveToLocation(randomPos);
 	if (result == EPathFollowingRequestResult::AlreadyAtGoal)
 	{
-		GetRandomPositionInNavMesh(me->GetActorLocation(), 500.0f, randomPos);
+		GetRandomPositionInNavMesh(me->GetActorLocation(), 1000.0f, randomPos);
 	}
 }
 
