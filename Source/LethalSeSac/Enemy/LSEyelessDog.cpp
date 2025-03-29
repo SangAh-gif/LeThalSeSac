@@ -3,6 +3,8 @@
 
 #include "LSEyelessDog.h"
 #include "LSDogFSM.h"
+#include "Components/BoxComponent.h"
+#include "LSCharacter.h"
 
 // Sets default values
 ALSEyelessDog::ALSEyelessDog()
@@ -20,6 +22,18 @@ ALSEyelessDog::ALSEyelessDog()
 		GetMesh()->SetRelativeLocationAndRotation(FVector(-10.0f, 0.0f, -92.0f), FRotator(0.0f, -90.0f, 0.0f));
 		GetMesh()->SetRelativeScale3D(FVector(0.05f));
 	}
+
+	OverlapBox = CreateDefaultSubobject<UBoxComponent>(TEXT("OverlapBox"));
+	OverlapBox->SetupAttachment(RootComponent);
+
+	OverlapBox->SetBoxExtent(FVector(120.0f, 100.0f, 100.0f));
+	OverlapBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	OverlapBox->SetCollisionObjectType(ECC_WorldDynamic);
+	OverlapBox->SetCollisionResponseToChannels(ECR_Ignore);
+	OverlapBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
+
+	// 
+	OverlapBox->OnComponentBeginOverlap.AddDynamic(this, &ALSEyelessDog::OnOverlapBegin);
 	
 }
 
@@ -42,5 +56,17 @@ void ALSEyelessDog::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ALSEyelessDog::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ALSCharacter* Player = Cast<ALSCharacter>(OtherActor);
+	{
+		if (Player)
+		{
+			Player->Die();
+		}
+	}
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Overlap %s")));
 }
 
